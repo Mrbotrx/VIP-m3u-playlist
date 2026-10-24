@@ -54,38 +54,68 @@ def detect_category(name):
                 return cat
     return "Entertainment"
 
-# ===== ফিল্টার =====
-PROXY_PATTERNS = ["robitv.com/rn/", "footfytv.pro/proxy/", "herokuapp.com/https://", "warm-caverns-"]
+# ===== প্রক্সি ডিটেক্ট (বাদ দেওয়ার জন্য নয়, হেডার ঠিক করার জন্য) =====
+def is_proxy_url(url):
+    u = url.lower()
+    return any(p in u for p in [
+        "robitv.com/rn/", "footfytv.pro/proxy/", "herokuapp.com/https://",
+        "warm-caverns-", "workers.dev/", "/proxy?", "proxy/direct",
+    ])
 
-def is_proxy(url):
-    return any(p in url.lower() for p in PROXY_PATTERNS)
-
+# ===== টোকেন 만료 চেক =====
 def token_expired(url):
     m = re.search(r'[?&]e=(\d+)', url)
     return bool(m) and int(m.group(1)) < time.time()
 
+# ===== সেশন প্যারামিটার =====
 def has_session_param(url):
     return "nimblesessionid" in url.lower()
 
-# ===== Working check =====
+# ===== Working check (প্রক্সি সহ) =====
 def is_working(url):
     if not url or ".m3u" not in url.lower():
         return False
-    if is_proxy(url) or token_expired(url) or has_session_param(url):
+
+    # 만료 টোকেন বাদ (প্রক্সি নয়, শুধু টোকেন)
+    if token_expired(url):
         return False
+
+    # সেশন প্যারামিটার বাদ
+    if has_session_param(url):
+        return False
+
+    # প্রক্সি হলে বেশি timeout + Referer/Origin
+    if is_proxy_url(url):
+        timeout = 12
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "Referer": "https://www.google.com/",
+            "Origin": "https://www.google.com",
+            "Accept": "*/*",
+        }
+    else:
+        timeout = 5
+        headers = {"User-Agent": "Mozilla/5.0"}
+
+    # HEAD চেষ্টা
     try:
-        req = urllib.request.Request(url, method="HEAD", headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=5) as r:
+        req = urllib.request.Request(url, method="HEAD", headers=headers)
+        with urllib.request.urlopen(req, timeout=timeout) as r:
             if r.status == 200:
                 return True
     except Exception:
         pass
+
+    # GET fallback (Range)
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0", "Range": "bytes=0-2048"})
-        with urllib.request.urlopen(req, timeout=5) as r:
+        h = dict(headers)
+        h["Range"] = "bytes=0-4096"
+        req = urllib.request.Request(url, headers=h)
+        with urllib.request.urlopen(req, timeout=timeout) as r:
             if r.status in (200, 206):
-                body = r.read(2048).decode("utf-8", errors="ignore")
-                return "#EXTM3U" in body or "#EXTINF" in body or ".ts" in body
+                body = r.read(4096).decode("utf-8", errors="ignore")
+                return ("#EXTM3U" in body or "#EXTINF" in body
+                        or ".ts" in body or "mpegurl" in body.lower())
     except Exception:
         return False
     return False
@@ -147,6 +177,8 @@ def parse_m3u_source(url):
 # ===== সব সোর্স লোড =====
 all_channels = []
 seen = set()
+seen.add(FIRST_CHANNEL["name"].lower().strip())
+
 for idx, src in enumerate(SOURCES, 1):
     print(f"📥 Source #{idx} ({src['type']})")
     if src["type"] == "json":
@@ -165,7 +197,7 @@ print(f"📦 Total: {len(all_channels)}")
 
 # ===== working check (parallel) =====
 urls = [ch["url"] for ch in all_channels]
-with concurrent.futures.ThreadPoolExecutor(max_workers=30) as ex:
+with concurrent.futures.ThreadPoolExecutor(max_workers=20) as ex:
     results = dict(zip(urls, ex.map(is_working, urls)))
 
 working = [ch for ch in all_channels if results.get(ch["url"], False)]
