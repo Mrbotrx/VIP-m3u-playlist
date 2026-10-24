@@ -1,6 +1,15 @@
 import json, os, urllib.request, concurrent.futures, re, time
 from datetime import datetime, timezone
 
+# ===== ডিবাগ: কোন env ভেরিয়েবল আছে দেখুন =====
+print("=" * 50)
+print("🔍 DEBUG: Environment variables")
+for key in ["SRC_JSON_1", "SRC_JSON_2", "SRC_JSON_3",
+            "SRC_M3U_1", "SRC_M3U_2", "SRC_M3U_3"]:
+    val = os.environ.get(key, "")
+    print(f"  {key}: {'SET (' + str(len(val)) + ' chars)' if val else 'EMPTY'}")
+print("=" * 50)
+
 # ===== Secret থেকে সোর্স সংগ্রহ =====
 SOURCES = []
 for i in range(1, 10):
@@ -14,6 +23,12 @@ for i in range(1, 10):
 
 if not SOURCES:
     print("❌ No sources found (check Secrets)")
+    print("")
+    print("👉 GitHub repo → Settings → Secrets and variables → Actions")
+    print("👉 New repository secret যোগ করুন:")
+    print("   Name: SRC_JSON_1")
+    print("   Value: https://rslivetv.pages.dev/bd76t2s1w9.json")
+    print("👉 তারপর Actions → Re-run workflows")
     exit(1)
 
 print(f"🔐 Loaded {len(SOURCES)} sources")
@@ -62,12 +77,10 @@ def is_proxy_url(url):
         "warm-caverns-", "workers.dev/", "/proxy?", "proxy/direct",
     ])
 
-# ===== টোকেন 만료 চেক =====
 def token_expired(url):
     m = re.search(r'[?&]e=(\d+)', url)
     return bool(m) and int(m.group(1)) < time.time()
 
-# ===== সেশন প্যারামিটার =====
 def has_session_param(url):
     return "nimblesessionid" in url.lower()
 
@@ -75,16 +88,11 @@ def has_session_param(url):
 def is_working(url):
     if not url or ".m3u" not in url.lower():
         return False
-
-    # 만료 টোকেন বাদ (প্রক্সি নয়, শুধু টোকেন)
     if token_expired(url):
         return False
-
-    # সেশন প্যারামিটার বাদ
     if has_session_param(url):
         return False
 
-    # প্রক্সি হলে বেশি timeout + Referer/Origin
     if is_proxy_url(url):
         timeout = 12
         headers = {
@@ -97,7 +105,6 @@ def is_working(url):
         timeout = 5
         headers = {"User-Agent": "Mozilla/5.0"}
 
-    # HEAD চেষ্টা
     try:
         req = urllib.request.Request(url, method="HEAD", headers=headers)
         with urllib.request.urlopen(req, timeout=timeout) as r:
@@ -106,7 +113,6 @@ def is_working(url):
     except Exception:
         pass
 
-    # GET fallback (Range)
     try:
         h = dict(headers)
         h["Range"] = "bytes=0-4096"
