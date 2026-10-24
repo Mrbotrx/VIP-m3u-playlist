@@ -10,6 +10,9 @@ for i in range(1, 10):
 for i in range(1, 10):
     u = os.environ.get(f"SRC_M3U_{i}", "").strip()
     if u:
+for i in range(1, 10):
+    u = os.environ.get(f"SRC_M3U_{i}", "").strip()
+    if u:
         SOURCES.append({"type": "m3u", "url": u})
 
 if not SOURCES:
