@@ -56,16 +56,18 @@ def is_fast(url):
             return True
     return True
 
-# ===== Working check =====
+# ===== Working check (দ্রুত: timeout 4s, 30 threads) =====
 def is_working(url):
     try:
         req = urllib.request.Request(url, method="HEAD", headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=6) as r:
+        with urllib.request.urlopen(req, timeout=4) as r:
             return r.status == 200
     except Exception:
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0", "Range": "bytes=0-1024"})
-            with urllib.request.urlopen(req, timeout=6) as r:
+            req = urllib.request.Request(
+                url, headers={"User-Agent": "Mozilla/5.0", "Range": "bytes=0-1024"}
+            )
+            with urllib.request.urlopen(req, timeout=4) as r:
                 return r.status in (200, 206)
         except Exception:
             return False
@@ -85,9 +87,9 @@ for ch in data:
         continue
     candidates.append(ch)
 
-# ===== working check =====
+# ===== working check (parallel) =====
 urls = [ch["url"] for ch in candidates]
-with concurrent.futures.ThreadPoolExecutor(max_workers=20) as ex:
+with concurrent.futures.ThreadPoolExecutor(max_workers=30) as ex:
     results = dict(zip(urls, ex.map(is_working, urls)))
 
 working = [ch for ch in candidates if results.get(ch["url"], False)]
@@ -104,7 +106,7 @@ for ch in working:
 
 total_working = sum(len(v) for v in grouped.values())
 
-# ===== হেডার (আপনার ফরম্যাট অনুযায়ী) =====
+# ===== হেডার (ফিক্সড ফরম্যাট) =====
 now = datetime.now(timezone.utc)
 lines = [
     "#EXTM3U",
@@ -113,7 +115,7 @@ lines = [
     f"# Facebook: {FB}",
     f"# Date: {now.strftime('%Y-%m-%d')}",
     f"# Time: {now.strftime('%H:%M UTC')}",
-    f"# Total Channels: {total_working + 1}",  # +1 ফিক্সড চ্যানেল
+    f"# Total Channels: {total_working + 1}",
     "",
 ]
 
