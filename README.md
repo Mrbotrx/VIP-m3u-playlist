@@ -1,4 +1,5 @@
 # VIP-m3u-playlist
+https://raw.githubusercontent.com/Mrbotrx/VIP-m3u-playlist/refs/heads/main/Banner/VIP-m3u-playlist_banner.jpg
 <div align="center">
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=230&section=header&text=VIP%20IPTV%20Playlist&fontSize=54&fontColor=fff&animation=twinkling&fontAlignY=35&desc=Fast%20%7C%20Auto%20Update%20%7C%20All%20Players&descAlignY=58&descSize=18" width="100%"/>
