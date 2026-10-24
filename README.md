@@ -14,6 +14,12 @@
 
 <br/>
 
+📺 VIP Playlist
+Click to copy
+```
+https://raw.githubusercontent.com/Mrbotrx/VIP-m3u-playlist/refs/heads/main/Vip%20playlists/vip_kbpro.m3u8
+```
+
 [![Channels](https://img.shields.io/badge/Channels-Auto%20Updated-success?style=for-the-badge&logo=livechat&logoColor=white)]()
 [![Update](https://img.shields.io/badge/Update-Every%201%20Hour-blueviolet?style=for-the-badge&logo=githubactions&logoColor=white)]()
 [![Players](https://img.shields.io/badge/Works%20On-All%20Players-orange?style=for-the-badge&logo=vlcmediaplayer&logoColor=white)]()
