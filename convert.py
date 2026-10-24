@@ -9,7 +9,7 @@ AUTHOR = "Kallyan Biswas"
 FB = "www.Facebook.com/kallyan.biswas.29"
 PLAYLIST_NAME = "Playlists"
 
-# ===== সবসময় ১ম চ্যানেল (ফিক্সড) =====
+# ===== স্থায়ী প্রথম চ্যানেল =====
 FIRST_CHANNEL = {
     "name": "IPTV LINKS",
     "logo": "https://raw.githubusercontent.com/Mrbotrx/Mrbotrx/refs/heads/main/IPTV_LINKS_LOGO.jpg",
@@ -18,7 +18,7 @@ FIRST_CHANNEL = {
     "tvg_id": "",
 }
 
-# ===== অটো ক্যাটাগরি =====
+# ===== স্বয়ংক্রিয় শ্রেণীবিভাগ =====
 CATEGORIES = [
     ("Sports", ["sports", "sport", "cricket", "willow", "ten ", "sony ten", "ptv", "gazi", "tsports", "a sports", "star sports"]),
     ("News", ["news", "somoy", "jamuna", "ekattor", "channel 24", "dbc", "atn news", "independent", "bangla vision", "ntv", "r tv", "ekushey", "boishakhi", "channel i", "channel 9", "maasranga", "deepto", "srk", "star news", "al jazeera", "akash", "akhan", "akhon", "btv", "bijoy", "global"]),
@@ -38,11 +38,10 @@ def detect_category(name):
                 return cat
     return "Entertainment"
 
-# ===== Working check (শুধু .m3u8 লিংক যাচাই) =====
+# ===== কার্যকরতা যাচাই (HEAD + GET fallback, কনটেন্ট যাচাই) =====
 def is_working(url):
     if not url or ".m3u8" not in url.lower():
         return False
-    # HEAD চেষ্টা
     try:
         req = urllib.request.Request(url, method="HEAD", headers={"User-Agent": "Mozilla/5.0"})
         with urllib.request.urlopen(req, timeout=5) as r:
@@ -50,7 +49,6 @@ def is_working(url):
                 return True
     except Exception:
         pass
-    # HEAD fail হলে GET (প্রথম কিছু বাইট)
     try:
         req = urllib.request.Request(
             url, headers={"User-Agent": "Mozilla/5.0", "Range": "bytes=0-2048"}
@@ -58,18 +56,17 @@ def is_working(url):
         with urllib.request.urlopen(req, timeout=5) as r:
             if r.status in (200, 206):
                 body = r.read(2048).decode("utf-8", errors="ignore")
-                # আসল m3u8 কনটেন্ট কিনা যাচাই
                 return "#EXTM3U" in body or "#EXTINF" in body
     except Exception:
         return False
     return False
 
-# ===== JSON আনুন =====
+# ===== JSON লোড করুন =====
 req = urllib.request.Request(JSON_URL, headers={'User-Agent': 'Mozilla/5.0'})
 with urllib.request.urlopen(req) as resp:
     data = json.loads(resp.read().decode())
 
-# ===== Working check (parallel, 30 threads) =====
+# ===== কার্যকরতা যাচাই (সমান্তরাল) =====
 all_channels = [ch for ch in data if ch.get("url")]
 urls = [ch["url"] for ch in all_channels]
 
@@ -103,7 +100,7 @@ lines = [
     "",
 ]
 
-# ===== ১ম চ্যানেল: IPTV LINKS (সবসময় উপরে) =====
+# ===== স্থায়ী প্রথম চ্যানেল =====
 lines.append(
     f'#EXTINF:-1 tvg-id="{FIRST_CHANNEL["tvg_id"]}" '
     f'tvg-name="{FIRST_CHANNEL["name"]}" '
@@ -113,7 +110,7 @@ lines.append(
 lines.append(FIRST_CHANNEL["url"])
 lines.append("")
 
-# ===== ক্যাটাগরি ব্লক =====
+# ===== শ্রেণীবিভাগ আউটপুট =====
 order = ["Sports", "News", "Movies", "Music", "Kids", "Documentary", "Religious", "Entertainment"]
 for cat in order:
     if cat not in grouped:
@@ -137,5 +134,3 @@ with open(OUT_FILE, "w", encoding="utf-8") as f:
 
 print(f"✅ Working: {total_working} + 1 fixed = {total_working + 1}")
 print(f"⏭ Dead/Skipped: {len(skipped_dead)}")
-if skipped_dead:
-    print("   Dead:", ", ".join(skipped_dead[:15]), "..." if len(skipped_dead) > 15 else "")
