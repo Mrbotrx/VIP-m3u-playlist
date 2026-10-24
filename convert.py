@@ -34,7 +34,53 @@ FIRST_CHANNEL = {
     "tvg_id": "",
 }
 
-# ===== অটো ক্যাটাগরি =====
+# ===== Auto Category System (৪ স্তর) =====
+
+# স্তর ১: Exact Match (নির্দিষ্ট চ্যানেল নাম)
+EXACT_MATCH = {
+    # Sports
+    "t sports": "Sports", "a sports": "Sports", "ptv sports": "Sports",
+    "star sports 1": "Sports", "star sports 2": "Sports",
+    "sony sports 1": "Sports", "sony sports 2": "Sports", "sony sports 5": "Sports",
+    "willow sports": "Sports", "gazi tv": "Sports",
+    # News
+    "somoy tv": "News", "jamuna tv": "News", "ekattor hd": "News",
+    "channel 24 hd": "News", "dbc news hd": "News", "atn news": "News",
+    "independent tv": "News", "bangla vision": "News", "ntv": "News",
+    "r tv": "News", "ekushey tv": "News", "boishakhi tv": "News",
+    "channel i hd": "News", "channel 9 hd": "News", "maasranga tv": "News",
+    "deepto tv hd": "News", "srk tv": "News", "star news": "News",
+    "al jazeera": "News", "btv hd": "News", "bijoy tv": "News",
+    "global channel hd": "News", "akhan tv": "News", "akhon tv": "News",
+    # Movies
+    "jalsha movies sd": "Movies", "jalsha movies hd": "Movies",
+    "sony max": "Movies", "sony max 2": "Movies", "sony movies": "Movies",
+    "zee bangla sonar": "Movies", "colors bangla cinema": "Movies",
+    "movie bangla": "Movies",
+    # Music
+    "sangeet bangla": "Music", "atn music": "Music",
+    "music india": "Music", "b4u music": "Music",
+    # Kids
+    "duronto tv": "Kids", "pogo": "Kids", "tiny pop": "Kids",
+    "pbs kids": "Kids", "gopal bhar": "Kids", "moto patlu": "Kids",
+    "tom and jerry": "Kids", "zb cartoon": "Kids", "batul the great": "Kids",
+    # Documentary
+    "animal planet": "Documentary", "discovery": "Documentary",
+    # Religious
+    "al quran": "Religious",
+    # Entertainment
+    "star jalsha hd": "Entertainment", "zee bangla": "Entertainment",
+    "colors bangla": "Entertainment", "sony aath": "Entertainment",
+    "enterr10": "Entertainment", "sananda tv": "Entertainment",
+    "bangla plus": "Entertainment", "matribhumi tv": "Entertainment",
+    "nagorik tv": "Entertainment", "asian tv": "Entertainment",
+    "ananda tv": "Entertainment", "me tv": "Entertainment",
+    "g-series": "Entertainment", "mohona tv": "Entertainment",
+    "ayna tv": "Entertainment", "green tv": "Entertainment",
+    "thikana tv": "Entertainment", "unmochon tv": "Entertainment",
+}
+
+# স্তর ২ ও ৩: নাম/গ্রুপ কীওয়ার্ড
 CATEGORIES = [
     ("Sports", ["sports", "sport", "cricket", "willow", "ten ", "sony ten", "ptv", "gazi", "tsports", "a sports", "star sports"]),
     ("News", ["news", "somoy", "jamuna", "ekattor", "channel 24", "dbc", "atn news", "independent", "bangla vision", "ntv", "r tv", "ekushey", "boishakhi", "channel i", "channel 9", "maasranga", "deepto", "srk", "star news", "al jazeera", "akash", "akhan", "akhon", "btv", "bijoy", "global"]),
@@ -46,12 +92,42 @@ CATEGORIES = [
     ("Entertainment", []),
 ]
 
-def detect_category(name):
-    low = name.lower()
+# স্তর ৪: URL কীওয়ার্ড
+URL_KEYWORDS = {
+    "Sports": ["/sport", "cricket", "/ten"],
+    "News": ["/news"],
+    "Movies": ["/movie", "/cinema"],
+    "Music": ["/music"],
+    "Kids": ["/kids", "/cartoon"],
+    "Documentary": ["/discovery", "/documentary"],
+    "Religious": ["/islam", "/quran"],
+}
+
+def detect_category(name, group="", url=""):
+    # স্তর ১: Exact Match
+    cat = EXACT_MATCH.get(name.lower().strip())
+    if cat:
+        return cat
+    # স্তর ২: Group
+    if group:
+        low_g = group.lower()
+        for cat, keys in CATEGORIES:
+            for k in keys:
+                if k in low_g:
+                    return cat
+    # স্তর ৩: নাম কীওয়ার্ড
+    low_n = name.lower()
     for cat, keys in CATEGORIES:
         for k in keys:
-            if k in low:
+            if k in low_n:
                 return cat
+    # স্তর ৪: URL
+    if url:
+        u = url.lower()
+        for cat, keys in URL_KEYWORDS.items():
+            for k in keys:
+                if k in u:
+                    return cat
     return "Entertainment"
 
 # ===== Fast/Slow ক্লাসিফিকেশন =====
@@ -68,7 +144,7 @@ def is_fast_url(url):
     for good in FAST_KEYWORDS:
         if good in u:
             return True
-    return True  # সাধারণ .m3u8 → fast ধরা হয়
+    return True
 
 def token_expired(url):
     m = re.search(r'[?&]e=(\d+)', url)
@@ -194,13 +270,14 @@ for ch in working:
 print(f"⚡ Fast: {len(fast_channels)}")
 print(f"🐢 Slow: {len(slow_channels)}")
 
-# ===== গ্রুপিং =====
+# ===== গ্রুপিং (৪-স্তরের Auto Category) =====
 fast_grouped = {}
 for ch in fast_channels:
     name = ch["name"]
     logo = ch.get("image", "")
     url = ch["url"]
-    cat = ch.get("group") or detect_category(name)
+    group = ch.get("group", "")
+    cat = detect_category(name, group, url)
     fast_grouped.setdefault(cat, []).append((name, logo, url))
 
 slow_grouped = {}
@@ -208,7 +285,8 @@ for ch in slow_channels:
     name = ch["name"]
     logo = ch.get("image", "")
     url = ch["url"]
-    cat = ch.get("group") or detect_category(name)
+    group = ch.get("group", "")
+    cat = detect_category(name, group, url)
     slow_grouped.setdefault(cat, []).append((name, logo, url))
 
 total = len(fast_channels) + len(slow_channels)
@@ -238,7 +316,7 @@ lines.append("")
 
 # ===== FAST সেকশন =====
 if fast_grouped:
-    lines.append(f'#EXTINF:-1 tvg-id="header.fast" tvg-name="=== ⚡ FAST Channels ===" group-title="FAST",⚡ Fast Channels ({len(fast_channels)})')
+    lines.append(f'#EXTINF:-1 tvg-id="header.fast" tvg-name="=== ⚡ FAST ===" group-title="FAST",⚡ Fast Channels ({len(fast_channels)})')
     lines.append("")
     order = ["Sports", "News", "Movies", "Music", "Kids", "Documentary", "Religious", "Entertainment"]
     for cat in list(fast_grouped.keys()):
@@ -247,7 +325,7 @@ if fast_grouped:
     for cat in order:
         if cat not in fast_grouped:
             continue
-        lines.append(f'#EXTINF:-1 tvg-id="header.fast.{cat.lower()}" tvg-name="=== FAST {cat} ===" group-title="FAST {cat}",⚡ {cat}')
+        lines.append(f'#EXTINF:-1 tvg-id="header.fast.{cat.lower()}" tvg-name="=== {cat} ===" group-title="FAST {cat}",🔹 {cat}')
         lines.append("")
         for name, logo, url in fast_grouped[cat]:
             tid = name.lower().replace(" ", ".").replace("+", "plus")
@@ -257,7 +335,7 @@ if fast_grouped:
 # ===== SLOW সেকশন =====
 if slow_grouped:
     lines.append("")
-    lines.append(f'#EXTINF:-1 tvg-id="header.slow" tvg-name="=== 🐢 SLOW Channels ===" group-title="SLOW",🐢 Slow Channels ({len(slow_channels)})')
+    lines.append(f'#EXTINF:-1 tvg-id="header.slow" tvg-name="=== 🐢 SLOW ===" group-title="SLOW",🐢 Slow Channels ({len(slow_channels)})')
     lines.append("")
     order = ["Sports", "News", "Movies", "Music", "Kids", "Documentary", "Religious", "Entertainment"]
     for cat in list(slow_grouped.keys()):
@@ -266,7 +344,7 @@ if slow_grouped:
     for cat in order:
         if cat not in slow_grouped:
             continue
-        lines.append(f'#EXTINF:-1 tvg-id="header.slow.{cat.lower()}" tvg-name="=== SLOW {cat} ===" group-title="SLOW {cat}",🐢 {cat}')
+        lines.append(f'#EXTINF:-1 tvg-id="header.slow.{cat.lower()}" tvg-name="=== {cat} ===" group-title="SLOW {cat}",🔹 {cat}')
         lines.append("")
         for name, logo, url in slow_grouped[cat]:
             tid = name.lower().replace(" ", ".").replace("+", "plus")
