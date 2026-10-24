@@ -1,15 +1,6 @@
 import json, os, urllib.request, concurrent.futures, re, time
 from datetime import datetime, timezone
 
-# ===== ডিবাগ: কোন env ভেরিয়েবল আছে দেখুন =====
-print("=" * 50)
-print("🔍 DEBUG: Environment variables")
-for key in ["SRC_JSON_1", "SRC_JSON_2", "SRC_JSON_3",
-            "SRC_M3U_1", "SRC_M3U_2", "SRC_M3U_3"]:
-    val = os.environ.get(key, "")
-    print(f"  {key}: {'SET (' + str(len(val)) + ' chars)' if val else 'EMPTY'}")
-print("=" * 50)
-
 # ===== Secret থেকে সোর্স সংগ্রহ =====
 SOURCES = []
 for i in range(1, 10):
@@ -23,12 +14,6 @@ for i in range(1, 10):
 
 if not SOURCES:
     print("❌ No sources found (check Secrets)")
-    print("")
-    print("👉 GitHub repo → Settings → Secrets and variables → Actions")
-    print("👉 New repository secret যোগ করুন:")
-    print("   Name: SRC_JSON_1")
-    print("   Value: https://rslivetv.pages.dev/bd76t2s1w9.json")
-    print("👉 তারপর Actions → Re-run workflows")
     exit(1)
 
 print(f"🔐 Loaded {len(SOURCES)} sources")
@@ -69,13 +54,21 @@ def detect_category(name):
                 return cat
     return "Entertainment"
 
-# ===== প্রক্সি ডিটেক্ট (বাদ দেওয়ার জন্য নয়, হেডার ঠিক করার জন্য) =====
-def is_proxy_url(url):
+# ===== Fast/Slow ক্লাসিফিকেশন =====
+FAST_KEYWORDS = ["/live", "index.m3u8", "playlist.m3u8", "chunks.m3u8", "mono.m3u8", "master.m3u8"]
+SLOW_KEYWORDS = [".mp4", ".smil", ".m3u?", "tracks-v1a1/mono.ts", "robitv.com/rn/", "footfytv.pro/proxy/", "herokuapp.com/https://", "warm-caverns-"]
+
+def is_fast_url(url):
     u = url.lower()
-    return any(p in u for p in [
-        "robitv.com/rn/", "footfytv.pro/proxy/", "herokuapp.com/https://",
-        "warm-caverns-", "workers.dev/", "/proxy?", "proxy/direct",
-    ])
+    if ".m3u8" not in u:
+        return False
+    for bad in SLOW_KEYWORDS:
+        if bad in u:
+            return False
+    for good in FAST_KEYWORDS:
+        if good in u:
+            return True
+    return True  # সাধারণ .m3u8 → fast ধরা হয়
 
 def token_expired(url):
     m = re.search(r'[?&]e=(\d+)', url)
@@ -84,44 +77,25 @@ def token_expired(url):
 def has_session_param(url):
     return "nimblesessionid" in url.lower()
 
-# ===== Working check (প্রক্সি সহ) =====
+# ===== Working check =====
 def is_working(url):
     if not url or ".m3u" not in url.lower():
         return False
-    if token_expired(url):
+    if token_expired(url) or has_session_param(url):
         return False
-    if has_session_param(url):
-        return False
-
-    if is_proxy_url(url):
-        timeout = 12
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-            "Referer": "https://www.google.com/",
-            "Origin": "https://www.google.com",
-            "Accept": "*/*",
-        }
-    else:
-        timeout = 5
-        headers = {"User-Agent": "Mozilla/5.0"}
-
     try:
-        req = urllib.request.Request(url, method="HEAD", headers=headers)
-        with urllib.request.urlopen(req, timeout=timeout) as r:
+        req = urllib.request.Request(url, method="HEAD", headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=5) as r:
             if r.status == 200:
                 return True
     except Exception:
         pass
-
     try:
-        h = dict(headers)
-        h["Range"] = "bytes=0-4096"
-        req = urllib.request.Request(url, headers=h)
-        with urllib.request.urlopen(req, timeout=timeout) as r:
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0", "Range": "bytes=0-2048"})
+        with urllib.request.urlopen(req, timeout=5) as r:
             if r.status in (200, 206):
-                body = r.read(4096).decode("utf-8", errors="ignore")
-                return ("#EXTM3U" in body or "#EXTINF" in body
-                        or ".ts" in body or "mpegurl" in body.lower())
+                body = r.read(2048).decode("utf-8", errors="ignore")
+                return "#EXTM3U" in body or "#EXTINF" in body or ".ts" in body
     except Exception:
         return False
     return False
@@ -201,24 +175,43 @@ for idx, src in enumerate(SOURCES, 1):
 
 print(f"📦 Total: {len(all_channels)}")
 
-# ===== working check (parallel) =====
+# ===== working check =====
 urls = [ch["url"] for ch in all_channels]
 with concurrent.futures.ThreadPoolExecutor(max_workers=20) as ex:
     results = dict(zip(urls, ex.map(is_working, urls)))
 
 working = [ch for ch in all_channels if results.get(ch["url"], False)]
-skipped = [ch["name"] for ch in all_channels if not results.get(ch["url"], False)]
+
+# ===== Fast / Slow ভাগ =====
+fast_channels = []
+slow_channels = []
+for ch in working:
+    if is_fast_url(ch["url"]):
+        fast_channels.append(ch)
+    else:
+        slow_channels.append(ch)
+
+print(f"⚡ Fast: {len(fast_channels)}")
+print(f"🐢 Slow: {len(slow_channels)}")
 
 # ===== গ্রুপিং =====
-grouped = {}
-for ch in working:
+fast_grouped = {}
+for ch in fast_channels:
     name = ch["name"]
     logo = ch.get("image", "")
     url = ch["url"]
     cat = ch.get("group") or detect_category(name)
-    grouped.setdefault(cat, []).append((name, logo, url))
+    fast_grouped.setdefault(cat, []).append((name, logo, url))
 
-total = sum(len(v) for v in grouped.values())
+slow_grouped = {}
+for ch in slow_channels:
+    name = ch["name"]
+    logo = ch.get("image", "")
+    url = ch["url"]
+    cat = ch.get("group") or detect_category(name)
+    slow_grouped.setdefault(cat, []).append((name, logo, url))
+
+total = len(fast_channels) + len(slow_channels)
 
 # ===== হেডার =====
 now = datetime.now(timezone.utc)
@@ -229,7 +222,7 @@ lines = [
     f"# Facebook: {FB}",
     f"# Date: {now.strftime('%Y-%m-%d')}",
     f"# Time: {now.strftime('%H:%M UTC')}",
-    f"# Total Channels: {total + 1}",
+    f"# Total Channels: {total + 1} (Fast: {len(fast_channels)}, Slow: {len(slow_channels)})",
     "",
 ]
 
@@ -243,21 +236,42 @@ lines.append(
 lines.append(FIRST_CHANNEL["url"])
 lines.append("")
 
-# ===== ক্যাটাগরি =====
-order = ["Sports", "News", "Movies", "Music", "Kids", "Documentary", "Religious", "Entertainment"]
-for cat in list(grouped.keys()):
-    if cat not in order:
-        order.append(cat)
-
-for cat in order:
-    if cat not in grouped:
-        continue
-    lines.append(f'#EXTINF:-1 tvg-id="header.{cat.lower()}" tvg-name="=== {cat} ===" group-title="{cat}",🔹 {cat} Channels')
+# ===== FAST সেকশন =====
+if fast_grouped:
+    lines.append(f'#EXTINF:-1 tvg-id="header.fast" tvg-name="=== ⚡ FAST Channels ===" group-title="FAST",⚡ Fast Channels ({len(fast_channels)})')
     lines.append("")
-    for name, logo, url in grouped[cat]:
-        tid = name.lower().replace(" ", ".").replace("+", "plus")
-        lines.append(f'#EXTINF:-1 tvg-id="{tid}" tvg-name="{name}" tvg-logo="{logo}" group-title="{cat}",{name}')
-        lines.append(url)
+    order = ["Sports", "News", "Movies", "Music", "Kids", "Documentary", "Religious", "Entertainment"]
+    for cat in list(fast_grouped.keys()):
+        if cat not in order:
+            order.append(cat)
+    for cat in order:
+        if cat not in fast_grouped:
+            continue
+        lines.append(f'#EXTINF:-1 tvg-id="header.fast.{cat.lower()}" tvg-name="=== FAST {cat} ===" group-title="FAST {cat}",⚡ {cat}')
+        lines.append("")
+        for name, logo, url in fast_grouped[cat]:
+            tid = name.lower().replace(" ", ".").replace("+", "plus")
+            lines.append(f'#EXTINF:-1 tvg-id="{tid}" tvg-name="{name}" tvg-logo="{logo}" group-title="FAST {cat}",{name}')
+            lines.append(url)
+
+# ===== SLOW সেকশন =====
+if slow_grouped:
+    lines.append("")
+    lines.append(f'#EXTINF:-1 tvg-id="header.slow" tvg-name="=== 🐢 SLOW Channels ===" group-title="SLOW",🐢 Slow Channels ({len(slow_channels)})')
+    lines.append("")
+    order = ["Sports", "News", "Movies", "Music", "Kids", "Documentary", "Religious", "Entertainment"]
+    for cat in list(slow_grouped.keys()):
+        if cat not in order:
+            order.append(cat)
+    for cat in order:
+        if cat not in slow_grouped:
+            continue
+        lines.append(f'#EXTINF:-1 tvg-id="header.slow.{cat.lower()}" tvg-name="=== SLOW {cat} ===" group-title="SLOW {cat}",🐢 {cat}')
+        lines.append("")
+        for name, logo, url in slow_grouped[cat]:
+            tid = name.lower().replace(" ", ".").replace("+", "plus")
+            lines.append(f'#EXTINF:-1 tvg-id="{tid}" tvg-name="{name}" tvg-logo="{logo}" group-title="SLOW {cat}",{name}')
+            lines.append(url)
 
 # ===== ফুটার =====
 lines.append("")
@@ -269,5 +283,6 @@ os.makedirs(OUT_DIR, exist_ok=True)
 with open(OUT_FILE, "w", encoding="utf-8") as f:
     f.write("\n".join(lines))
 
-print(f"✅ Working: {total} + 1 fixed = {total + 1}")
-print(f"⏭ Skipped: {len(skipped)}")
+print(f"✅ Total: {total} + 1 fixed = {total + 1}")
+print(f"   ⚡ Fast: {len(fast_channels)}")
+print(f"   🐢 Slow: {len(slow_channels)}")
