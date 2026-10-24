@@ -1,4 +1,4 @@
-name: Fast M3U Update
+name: Working M3U Update
 
 on:
   schedule:
@@ -15,7 +15,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -38,4 +38,4 @@ jobs:
             exit 0
           fi
           git commit -m "Auto update - $(date -u +'%Y-%m-%d %H:%M UTC')"
-          git push
+          git pushpush
