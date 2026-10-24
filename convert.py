@@ -38,62 +38,46 @@ def detect_category(name):
                 return cat
     return "Entertainment"
 
-# ===== FAST ফিল্টার =====
-FAST_KEYWORDS = ["/live", "index.m3u8", "playlist.m3u8", "chunks.m3u8", "mono.m3u8", "master.m3u8"]
-SLOW_KEYWORDS = [".mp4", ".smil", ".m3u?", "tracks-v1a1/mono.ts"]
-
-def is_fast(url):
-    if not url:
-        return False
-    u = url.lower()
-    if ".m3u8" not in u:
-        return False
-    for bad in SLOW_KEYWORDS:
-        if bad in u:
-            return False
-    for good in FAST_KEYWORDS:
-        if good in u:
-            return True
-    return True
-
-# ===== Working check (দ্রুত: timeout 4s, 30 threads) =====
+# ===== Working check (শুধু .m3u8 লিংক যাচাই) =====
 def is_working(url):
+    if not url or ".m3u8" not in url.lower():
+        return False
+    # HEAD চেষ্টা
     try:
         req = urllib.request.Request(url, method="HEAD", headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=4) as r:
-            return r.status == 200
+        with urllib.request.urlopen(req, timeout=5) as r:
+            if r.status == 200:
+                return True
     except Exception:
-        try:
-            req = urllib.request.Request(
-                url, headers={"User-Agent": "Mozilla/5.0", "Range": "bytes=0-1024"}
-            )
-            with urllib.request.urlopen(req, timeout=4) as r:
-                return r.status in (200, 206)
-        except Exception:
-            return False
+        pass
+    # HEAD fail হলে GET (প্রথম কিছু বাইট)
+    try:
+        req = urllib.request.Request(
+            url, headers={"User-Agent": "Mozilla/5.0", "Range": "bytes=0-2048"}
+        )
+        with urllib.request.urlopen(req, timeout=5) as r:
+            if r.status in (200, 206):
+                body = r.read(2048).decode("utf-8", errors="ignore")
+                # আসল m3u8 কনটেন্ট কিনা যাচাই
+                return "#EXTM3U" in body or "#EXTINF" in body
+    except Exception:
+        return False
+    return False
 
 # ===== JSON আনুন =====
 req = urllib.request.Request(JSON_URL, headers={'User-Agent': 'Mozilla/5.0'})
 with urllib.request.urlopen(req) as resp:
     data = json.loads(resp.read().decode())
 
-# ===== ফরম্যাট ফিল্টার =====
-candidates = []
-skipped_fmt = []
-for ch in data:
-    url = ch.get("url", "")
-    if not is_fast(url):
-        skipped_fmt.append(ch.get("name", "Unknown"))
-        continue
-    candidates.append(ch)
+# ===== Working check (parallel, 30 threads) =====
+all_channels = [ch for ch in data if ch.get("url")]
+urls = [ch["url"] for ch in all_channels]
 
-# ===== working check (parallel) =====
-urls = [ch["url"] for ch in candidates]
 with concurrent.futures.ThreadPoolExecutor(max_workers=30) as ex:
     results = dict(zip(urls, ex.map(is_working, urls)))
 
-working = [ch for ch in candidates if results.get(ch["url"], False)]
-skipped_dead = [ch["name"] for ch in candidates if not results.get(ch["url"], False)]
+working = [ch for ch in all_channels if results.get(ch["url"], False)]
+skipped_dead = [ch.get("name", "Unknown") for ch in all_channels if not results.get(ch["url"], False)]
 
 # ===== গ্রুপিং =====
 grouped = {}
@@ -106,7 +90,7 @@ for ch in working:
 
 total_working = sum(len(v) for v in grouped.values())
 
-# ===== হেডার (ফিক্সড ফরম্যাট) =====
+# ===== হেডার =====
 now = datetime.now(timezone.utc)
 lines = [
     "#EXTM3U",
@@ -152,5 +136,6 @@ with open(OUT_FILE, "w", encoding="utf-8") as f:
     f.write("\n".join(lines))
 
 print(f"✅ Working: {total_working} + 1 fixed = {total_working + 1}")
-print(f"⏭ Format-skipped: {len(skipped_fmt)}")
-print(f"⏭ Dead-skipped: {len(skipped_dead)}")
+print(f"⏭ Dead/Skipped: {len(skipped_dead)}")
+if skipped_dead:
+    print("   Dead:", ", ".join(skipped_dead[:15]), "..." if len(skipped_dead) > 15 else "")
