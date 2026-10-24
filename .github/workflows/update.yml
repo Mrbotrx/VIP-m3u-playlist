@@ -1,16 +1,21 @@
-name: Auto Update M3U
+name: Fast M3U Update
 
 on:
   schedule:
-    - cron: '0 * * * *'   # প্রতি ঘণ্টায়
+    - cron: '0 * * * *'
   workflow_dispatch:
 
 permissions:
   contents: write
 
+concurrency:
+  group: m3u-update
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
