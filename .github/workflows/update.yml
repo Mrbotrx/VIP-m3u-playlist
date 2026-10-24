@@ -2,7 +2,7 @@ name: Working M3U Update
 
 on:
   schedule:
-    - cron: "0 */1 * * *"
+    - cron: '0 */1 * * *'
   workflow_dispatch:
 
 permissions:
@@ -22,18 +22,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
-
-      - name: Debug Secrets
-        env:
-          SRC_JSON_1: ${{ secrets.SRC_JSON_1 }}
-          SRC_JSON_2: ${{ secrets.SRC_JSON_2 }}
-          SRC_M3U_1: ${{ secrets.SRC_M3U_1 }}
-          SRC_M3U_2: ${{ secrets.SRC_M3U_2 }}
-        run: |
-          echo "SRC_JSON_1 length: ${#SRC_JSON_1}"
-          echo "SRC_JSON_2 length: ${#SRC_JSON_2}"
-          echo "SRC_M3U_1 length: ${#SRC_M3U_1}"
-          echo "SRC_M3U_2 length: ${#SRC_M3U_2}"
 
       - name: Generate M3U
         env:
