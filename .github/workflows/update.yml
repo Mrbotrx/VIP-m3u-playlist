@@ -29,6 +29,7 @@ jobs:
           SRC_JSON_2: ${{ secrets.SRC_JSON_2 }}
           SRC_M3U_1: ${{ secrets.SRC_M3U_1 }}
           SRC_M3U_2: ${{ secrets.SRC_M3U_2 }}
+          SRC_M3U_3: ${{ secrets.SRC_M3U_3 }}
         run: python convert.py
 
       - name: Commit & Push
