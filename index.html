@@ -30,7 +30,7 @@ button:focus-visible,.ch-main:focus-visible,input:focus-visible,select:focus-vis
 .live-pill i{width:7px;height:7px;border-radius:50%;background:var(--danger);box-shadow:0 0 8px var(--danger);animation:pulse 1.4s infinite}
 @keyframes pulse{50%{opacity:.25}}
 
-/* Notice bar (always visible, scrolling text) */
+/* Notice bar */
 .notice{position:sticky;top:var(--top-h);z-index:29;height:var(--notice-h);display:flex;align-items:center;overflow:hidden;background:#0b1a0b;border-bottom:1px solid var(--line);color:var(--accent);font-family:var(--name-font);font-size:13px;letter-spacing:.5px}
 .notice-track{display:inline-flex;white-space:nowrap;animation:marquee var(--speed,18s) linear infinite}
 .notice-track span{padding-right:60px}
@@ -190,9 +190,10 @@ footer{text-align:center;padding:18px;color:#4f604f;font-size:11px;letter-spacin
    ✏️  EDIT ZONE — শুধু এখানে বদল করুন
    ========================================================= */
 // নোটিশ টেক্সট। খালি রাখলে ("") নোটিশ বার লুকিয়ে যাবে।
-const NOTICE_TEXT = "KBPRO TV NOTICE
+// বহু-লাইনের জন্য backtick (`) ব্যবহার করা হয়েছে।
+const NOTICE_TEXT = `KBPRO TV NOTICE
 📺 আমাদের সার্ভারে আপডেট চলছে। কিছু চ্যানেল সাময়িকভাবে বন্ধ থাকতে পারে। অনুগ্রহ করে অপেক্ষা করুন, খুব শীঘ্রই সব চ্যানেল চালু হবে।
-❤️ KBPRO TV TEAM";
+❤️ KBPRO TV TEAM`;
 // স্ক্রল গতি (সেকেন্ড): বড় সংখ্যা = ধীর
 const NOTICE_SPEED_SEC = 18;
 // নোটিশ স্ক্রল না করে স্থির দেখাতে চাইলে false
@@ -229,7 +230,11 @@ function setupNotice() {
   bar.classList.remove("hidden");
   // দুইবার লেখা যাতে স্ক্রল নিখুঁতভাবে লুপ হয়
   track.replaceChildren(
-    ...[0, 1].map(() => { const s = document.createElement("span"); s.textContent = text; return s; })
+    ...[0, 1].map(() => {
+      const s = document.createElement("span");
+      s.textContent = text;
+      return s;
+    })
   );
   track.style.setProperty("--speed", NOTICE_SPEED_SEC + "s");
   bar.classList.toggle("static", !NOTICE_SCROLL);
@@ -388,7 +393,8 @@ function updateNowFav() {
 function toggleFav(i) {
   const ch = channels[i];
   if (!ch) return;
-  favs.has(ch.url) ? favs.delete(ch.url) : favs.add(ch.url);
+  if (favs.has(ch.url)) favs.delete(ch.url);
+  else favs.add(ch.url);
   saveFavs();
   render();
 }
