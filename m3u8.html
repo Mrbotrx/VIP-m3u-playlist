@@ -1,389 +1,457 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>KB TV PRO - Channel Submission</title>
+<title>KB TV PRO | Submit Information</title>
 
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-body{
-    font-family:Arial,sans-serif;
-    background:#080d18;
-    color:#fff;
-    min-height:100vh;
+body {
+    font-family: Arial, sans-serif;
+    background: #080d19;
+    color: white;
+    min-height: 100vh;
+    padding: 20px;
 }
 
-header{
-    padding:25px 15px;
-    text-align:center;
-    background:linear-gradient(135deg,#101e35,#07101e);
-    border-bottom:1px solid #203957;
+.container {
+    max-width: 650px;
+    margin: 35px auto;
 }
 
-.logo{
-    font-size:30px;
-    font-weight:900;
-    color:#00e5ff;
-    letter-spacing:2px;
+.header {
+    text-align: center;
+    margin-bottom: 28px;
 }
 
-header p{
-    color:#aab8ca;
-    margin-top:10px;
-    font-size:13px;
+.logo {
+    width: 75px;
+    height: 75px;
+    margin: auto;
+    display: grid;
+    place-items: center;
+    border-radius: 20px;
+    background: linear-gradient(135deg,#00d9ff,#0066ff);
+    font-size: 30px;
+    font-weight: 900;
 }
 
-.container{
-    max-width:650px;
-    margin:35px auto;
-    padding:15px;
+.header h1 {
+    margin-top: 15px;
+    font-size: 28px;
 }
 
-.card{
-    background:#111c2e;
-    padding:25px;
-    border-radius:16px;
-    border:1px solid #263d5b;
-    box-shadow:0 10px 35px #0008;
+.header span {
+    color: #00d9ff;
 }
 
-.badge{
-    display:inline-block;
-    background:#063e49;
-    color:#00e5ff;
-    padding:7px 13px;
-    border-radius:20px;
-    font-size:11px;
-    margin-bottom:15px;
+.header p {
+    color: #9eabc0;
+    margin-top: 12px;
+    line-height: 1.7;
 }
 
-h2{
-    font-size:23px;
-    margin-bottom:12px;
+.card {
+    background: #111b2d;
+    border: 1px solid #263650;
+    border-radius: 18px;
+    padding: 27px;
+    box-shadow: 0 15px 40px #0005;
 }
 
-.description{
-    color:#aab8ca;
-    font-size:14px;
-    line-height:1.7;
-    margin-bottom:25px;
+.card h2 {
+    color: #00d9ff;
+    margin-bottom: 25px;
 }
 
-label{
-    display:block;
-    margin:18px 0 8px;
-    font-size:13px;
-    font-weight:bold;
-    color:#dce9f8;
+.form-group {
+    margin-bottom: 21px;
 }
 
-input,textarea,select{
-    width:100%;
-    padding:14px;
-    border-radius:9px;
-    border:1px solid #30435d;
-    background:#091323;
-    color:white;
-    outline:none;
-    font-size:14px;
+label {
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 9px;
 }
 
-input:focus,textarea:focus{
-    border-color:#00d9ff;
+input,
+textarea {
+    width: 100%;
+    padding: 15px;
+    background: #091323;
+    border: 1px solid #35445c;
+    border-radius: 10px;
+    color: white;
+    font-size: 14px;
+    outline: none;
+    font-family: Arial;
 }
 
-textarea{
-    resize:vertical;
-    min-height:100px;
+input:focus,
+textarea:focus {
+    border-color: #00d9ff;
 }
 
-button{
-    width:100%;
-    padding:15px;
-    margin-top:25px;
-    background:linear-gradient(90deg,#00bcd4,#0077ff);
-    color:white;
-    border:0;
-    border-radius:9px;
-    font-size:15px;
-    font-weight:bold;
-    cursor:pointer;
+textarea {
+    min-height: 125px;
+    resize: vertical;
 }
 
-button:disabled{
-    opacity:.5;
-    cursor:not-allowed;
+input::placeholder,
+textarea::placeholder {
+    color: #78869a;
 }
 
-#message{
-    display:none;
-    margin-top:20px;
-    padding:15px;
-    border-radius:9px;
-    text-align:center;
-    line-height:1.6;
+button {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(90deg,#006aff,#00d9ff);
+    color: white;
+    font-size: 16px;
+    font-weight: 900;
+    cursor: pointer;
 }
 
-.success{
-    background:#073c2b;
-    color:#50ffb0;
+button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
 }
 
-.error{
-    background:#451b25;
-    color:#ff9eaa;
+#status {
+    display: none;
+    margin-top: 18px;
+    padding: 14px;
+    border-radius: 9px;
+    line-height: 1.6;
+    font-size: 14px;
+    text-align: center;
 }
 
-.notice{
-    margin-top:25px;
-    background:#17243a;
-    padding:18px;
-    border-radius:10px;
-    color:#b8c9dc;
-    font-size:13px;
-    line-height:1.8;
+.success {
+    display: block !important;
+    background: #073d2b;
+    color: #65ffb6;
 }
 
-footer{
-    text-align:center;
-    padding:25px;
-    color:#8293aa;
-    font-size:12px;
+.error {
+    display: block !important;
+    background: #481b25;
+    color: #ff9da9;
 }
 
-footer span{
-    color:#00e5ff;
+.footer {
+    text-align: center;
+    color: #9eabc0;
+    padding: 30px 10px;
+    line-height: 2;
+    font-size: 13px;
+}
+
+.footer strong {
+    color: #00d9ff;
+}
+
+.footer a {
+    color: #00d9ff;
+    text-decoration: none;
+}
+
+.social {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 12px;
+}
+
+.social a {
+    padding: 10px 17px;
+    background: #172943;
+    border-radius: 8px;
+}
+
+.hp {
+    position: absolute;
+    left: -9999px;
+}
+
+@media(max-width:480px) {
+    .card {
+        padding: 20px;
+    }
+
+    .header h1 {
+        font-size: 24px;
+    }
 }
 
 </style>
+
 </head>
 
 <body>
 
-<header>
-    <div class="logo">KB TV PRO</div>
-    <p>CHANNEL SUBMISSION PORTAL</p>
-</header>
-
 <div class="container">
 
-<div class="card">
+    <header class="header">
 
-<span class="badge">COMMUNITY CONTRIBUTION</span>
+        <div class="logo">KB</div>
 
-<h2>Submit Your Channel</h2>
+        <h1>KB TV <span>PRO</span></h1>
 
-<p class="description">
-তোমার কাছে যদি নতুন কোনো M3U8 Link,
-M3U Playlist অথবা নতুন TV Channel থাকে,
-তাহলে আমাদের জানাতে পারো।
+        <p>
+            Share Your Information<br>
+            Help us improve our IPTV community.
+        </p>
 
-তোমার দেওয়া তথ্য KB TV PRO Team পর্যালোচনা করবে।
-</p>
+    </header>
 
-<form id="submissionForm">
 
-<label>Channel Name *</label>
-<input
-type="text"
-id="channelName"
-placeholder="Example: Jalsha Movies HD"
-required
->
+    <main class="card">
 
-<label>M3U8 / Stream URL *</label>
-<input
-type="url"
-id="streamUrl"
-placeholder="https://example.com/live/index.m3u8"
-required
->
+        <h2>📩 Share Your Information</h2>
 
-<label>Channel Logo URL</label>
-<input
-type="url"
-id="logoUrl"
-placeholder="https://example.com/logo.png"
->
+        <form id="submissionForm">
 
-<label>M3U / M3U8 Playlist URL</label>
-<input
-type="url"
-id="playlistUrl"
-placeholder="https://example.com/playlist.m3u"
->
+            <div class="form-group">
 
-<label>Additional Information</label>
-<textarea
-id="additionalInfo"
-placeholder="Write channel details, category or other information..."
-></textarea>
+                <label>Your Name *</label>
 
-<button type="submit" id="submitBtn">
-SUBMIT CHANNEL →
-</button>
+                <input
+                    type="text"
+                    name="name"
+                    placeholder="আপনার নাম লিখুন"
+                    maxlength="100"
+                    required
+                >
 
-</form>
+            </div>
 
-<div id="message"></div>
 
-<div class="notice">
-<strong>IMPORTANT NOTICE</strong><br><br>
+            <div class="form-group">
 
-• শুধুমাত্র বৈধ ও অনুমোদিত Channel Link Submit করবে।<br>
-• ভুল অথবা Duplicate Link Submit করবে না।<br>
-• প্রতিটি Submission KB TV PRO Team Review করবে।<br>
-• তোমার Contribution আমাদের জন্য গুরুত্বপূর্ণ।
+                <label>Subject *</label>
+
+                <input
+                    type="text"
+                    name="subject"
+                    placeholder="আপনি কী বিষয়ে জানাতে চান?"
+                    maxlength="150"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Your Message / Information *</label>
+
+                <textarea
+                    name="message"
+                    placeholder="আপনার তথ্য, লিংক, পরামর্শ অথবা বিস্তারিত লিখুন..."
+                    maxlength="3000"
+                    required
+                ></textarea>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Attachment / Links (Optional)</label>
+
+                <textarea
+                    name="links"
+                    placeholder="M3U8, M3U, Logo অথবা Website Link যুক্ত করুন..."
+                    maxlength="1000"
+                ></textarea>
+
+            </div>
+
+
+            <!-- Anti-spam honeypot -->
+
+            <div class="hp">
+                <label>Website</label>
+                <input type="text" name="website" tabindex="-1">
+            </div>
+
+
+            <button type="submit" id="submitBtn">
+                SUBMIT INFORMATION 🚀
+            </button>
+
+            <div id="status"></div>
+
+        </form>
+
+    </main>
+
+
+    <footer class="footer">
+
+        <p>
+            Made by <strong>KALLYAN BISWAS</strong>
+        </p>
+
+        <div class="social">
+
+            <a href="https://www.facebook.com/kallyan.biswas.29"
+               target="_blank" rel="noopener noreferrer">
+                Facebook
+            </a>
+
+            <a href="https://t.me/iptvlinksm3u8"
+               target="_blank" rel="noopener noreferrer">
+                Telegram
+            </a>
+
+        </div>
+
+        <br>
+
+        © 2026 KB TV PRO. All Rights Reserved.
+
+    </footer>
+
 </div>
 
-</div>
-</div>
-
-<footer>
-    © 2026 <span>KB TV PRO</span> | Channel Submission System
-    <br><br>
-    Powered by KB TV PRO Team
-</footer>
 
 <script>
 
-// ====================================
-// KB TV PRO SUBMISSION CONFIGURATION
-// ====================================
+const WEBHOOK_URL =
+"https://api.bots.business/v1/bots/3011400/new-webhook?&command=%2Freceive-submission&public_user_token=f7e56b10451621b473ca292ddc99efa5&user_id=41029675";
 
-// এখানে তোমার Telegram Bot Token এবং Chat ID বসাবে।
-const BOT_TOKEN = "YOUR_BOT_TOKEN";
-const CHAT_ID = "YOUR_CHAT_ID";
 
 const form = document.getElementById("submissionForm");
-const button = document.getElementById("submitBtn");
-const message = document.getElementById("message");
 
-form.addEventListener("submit", async function(e){
+const button = document.getElementById("submitBtn");
+
+const statusBox = document.getElementById("status");
+
+
+function showStatus(message, type) {
+
+    statusBox.textContent = message;
+
+    statusBox.className = type;
+
+}
+
+
+form.addEventListener("submit", async function(e) {
 
     e.preventDefault();
 
-    const channelName =
-        document.getElementById("channelName").value.trim();
+    if (!form.reportValidity()) return;
 
-    const streamUrl =
-        document.getElementById("streamUrl").value.trim();
+    if (WEBHOOK_URL === "YOUR_BOT_BUSINESS_WEBHOOK_URL") {
 
-    const logoUrl =
-        document.getElementById("logoUrl").value.trim();
+        showStatus("Please configure the Webhook URL.", "error");
 
-    const playlistUrl =
-        document.getElementById("playlistUrl").value.trim();
-
-    const additionalInfo =
-        document.getElementById("additionalInfo").value.trim();
-
-    if(!channelName || !streamUrl){
-        showMessage("Please fill in all required fields.","error");
         return;
     }
 
-    if(BOT_TOKEN === "YOUR_BOT_TOKEN" ||
-       CHAT_ID === "YOUR_CHAT_ID"){
+    const fd = new FormData(form);
 
-        showMessage(
-        "Submission system is not configured yet. Please contact the administrator.",
-        "error"
-        );
+    const data = {
+
+        name: fd.get("name").trim(),
+
+        subject: fd.get("subject").trim(),
+
+        message: fd.get("message").trim(),
+
+        links: fd.get("links").trim(),
+
+        website: fd.get("website")
+
+    };
+
+
+    if (!data.name || !data.subject || !data.message) {
+
+        showStatus("Please complete all required fields.", "error");
+
         return;
+
     }
 
-    const text =
-`📺 KB TV PRO - NEW SUBMISSION
-
-📡 Channel Name:
-${channelName}
-
-🔗 M3U8 / Stream URL:
-${streamUrl}
-
-🖼️ Channel Logo:
-${logoUrl || "Not provided"}
-
-📂 Playlist URL:
-${playlistUrl || "Not provided"}
-
-📝 Additional Information:
-${additionalInfo || "None"}
-
-⏰ Date:
-${new Date().toLocaleString()}
-
-━━━━━━━━━━━━━━━━
-KB TV PRO SUBMISSION SYSTEM`;
 
     button.disabled = true;
-    button.innerText = "SUBMITTING...";
 
-    try{
+    button.textContent = "SUBMITTING...";
 
-        const response = await fetch(
-        `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
-        {
-            method:"POST",
-            headers:{
-                "Content-Type":"application/json"
+
+    try {
+
+        const response = await fetch(WEBHOOK_URL, {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "text/plain;charset=UTF-8"
             },
-            body:JSON.stringify({
-                chat_id:CHAT_ID,
-                text:text,
-                disable_web_page_preview:true
-            })
+
+            body: JSON.stringify(data)
+
         });
+
+
+        if (!response.ok) {
+
+            throw new Error("Submission server error.");
+
+        }
+
 
         const result = await response.json();
 
-        if(!response.ok || !result.ok){
-            throw new Error("Telegram submission failed");
+
+        if (!result.success) {
+
+            throw new Error(result.message || "Submission failed.");
+
         }
 
-        showMessage(
-        "✅ Thank you! Your Channel Information has been sent to KB TV PRO Admin successfully.",
-        "success"
+
+        showStatus(
+            "✅ Information submitted successfully! Thank you for supporting KB TV PRO.",
+            "success"
         );
 
         form.reset();
 
-    }catch(error){
 
-        showMessage(
-        "❌ Submission failed. Please try again later.",
-        "error"
+    } catch(error) {
+
+        showStatus(
+            "❌ Submission failed. Check your connection or Webhook configuration. " + error.message,
+            "error"
         );
 
-    }finally{
+    } finally {
 
         button.disabled = false;
-        button.innerText = "SUBMIT CHANNEL →";
+
+        button.textContent = "SUBMIT INFORMATION 🚀";
 
     }
 
 });
-
-function showMessage(text,type){
-
-    message.style.display = "block";
-    message.className = type;
-    message.textContent = text;
-
-    message.scrollIntoView({
-        behavior:"smooth",
-        block:"center"
-    });
-
-}
 
 </script>
 
