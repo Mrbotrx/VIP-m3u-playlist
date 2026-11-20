@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="theme-color" content="#080b12">
+<meta name="description" content="KB TV PRO M3U8 and IPTV Playlist Submission Portal">
+
+<title>KB TV PRO | M3U8 Submission Portal</title>
+
+<style>
+:root {
+    --bg: #070b13;
+    --card: #101827;
+    --border: #26374b;
+    --cyan: #00e5ff;
+    --blue: #087cf0;
+    --text: #ffffff;
+    --muted: #9ba9ba;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background:
+    radial-gradient(circle at top, #102b43 0%, transparent 40%),
+    var(--bg);
+
+    color: var(--text);
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 600px;
+    margin: 30px auto;
+}
+
+/* HEADER */
+
+.header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.logo {
+    font-size: 35px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    color: var(--cyan);
+    text-shadow: 0 0 20px #00e5ff66;
+}
+
+.badge {
+    display: inline-block;
+    margin-top: 12px;
+    background: #092e40;
+    color: var(--cyan);
+    border: 1px solid #07516a;
+    border-radius: 30px;
+    padding: 7px 15px;
+    font-size: 11px;
+    letter-spacing: 1px;
+}
+
+.header p {
+    margin-top: 18px;
+    color: var(--muted);
+    line-height: 1.8;
+    font-size: 14px;
+}
+
+/* CARD */
+
+.card {
+    background: linear-gradient(145deg, #131e30, #0c1421);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 25px;
+    box-shadow: 0 15px 45px #0008;
+}
+
+.card-title {
+    font-size: 21px;
+    color: var(--cyan);
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 22px;
+    line-height: 1.6;
+}
+
+/* INPUT */
+
+label {
+    display: block;
+    color: #dce6f1;
+    font-size: 13px;
+    margin: 17px 0 8px;
+}
+
+input, textarea {
+    width: 100%;
+    background: #080f1b;
+    border: 1px solid #2a3d55;
+    border-radius: 9px;
+    padding: 14px;
+    color: white;
+    font-size: 14px;
+    outline: none;
+    transition: .2s;
+}
+
+input:focus, textarea:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 10px #00e5ff20;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 95px;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #65758a;
+}
+
+/* PREVIEW */
+
+.preview-box {
+    margin-top: 12px;
+    min-height: 80px;
+    display: none;
+    align-items: center;
+    gap: 15px;
+    background: #08121f;
+    border: 1px solid var(--border);
+    padding: 12px;
+    border-radius: 10px;
+}
+
+.preview-box img {
+    width: 65px;
+    height: 65px;
+    object-fit: contain;
+    background: white;
+    border-radius: 8px;
+}
+
+.preview-box span {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+/* BUTTON */
+
+.submit-btn {
+    width: 100%;
+    padding: 16px;
+    margin-top: 24px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #087cf0, #00d9ff);
+    color: #00121b;
+    font-weight: 900;
+    font-size: 15px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.submit-btn:hover {
+    filter: brightness(1.15);
+    transform: translateY(-2px);
+}
+
+.submit-btn:disabled {
+    opacity: .5;
+    cursor: wait;
+    transform: none;
+}
+
+/* STATUS */
+
+.status {
+    display: none;
+    padding: 14px;
+    border-radius: 9px;
+    margin-top: 18px;
+    font-size: 13px;
+    line-height: 1.6;
+    text-align: center;
+}
+
+.success {
+    display: block;
+    background: #073b2c;
+    color: #51ffbd;
+    border: 1px solid #126b4c;
+}
+
+.error {
+    display: block;
+    background: #421923;
+    color: #ff9aa9;
+    border: 1px solid #74303d;
+}
+
+/* INFORMATION */
+
+.info {
+    margin-top: 22px;
+    background: #101d2b;
+    border: 1px solid #26374b;
+    border-radius: 13px;
+    padding: 20px;
+    text-align: center;
+}
+
+.info h3 {
+    color: var(--cyan);
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.info p {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+/* FOOTER */
+
+.footer {
+    text-align: center;
+    margin-top: 30px;
+    padding: 20px;
+    border-top: 1px solid #253346;
+}
+
+.footer strong {
+    color: var(--cyan);
+    font-size: 14px;
+}
+
+.footer p {
+    margin-top: 12px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.footer a {
+    color: #00d9ff;
+    text-decoration: none;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+}
+
+.social {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+}
+
+.social a {
+    border: 1px solid #24445c;
+    background: #102438;
+    padding: 10px 17px;
+    border-radius: 8px;
+    font-size: 12px;
+}
+
+@media(max-width:480px) {
+    body {
+        padding: 12px;
+    }
+
+    .container {
+        margin-top: 15px;
+    }
+
+    .card {
+        padding: 19px;
+    }
+
+    .logo {
+        font-size: 29px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+
+    <header class="header">
+
+        <div class="logo">KB TV PRO</div>
+
+        <div class="badge">
+            IPTV COMMUNITY SUBMISSION PORTAL
+        </div>
+
+        <p>
+            📢 আপনার কাছে কি নতুন কোনো M3U8 Link
+            অথবা IPTV Playlist আছে?
+            <br>
+            আমাদের সঙ্গে শেয়ার করুন।
+            <br>
+            আপনার দেওয়া তথ্য Admin-এর কাছে পৌঁছে যাবে।
+        </p>
+
+    </header>
+
+
+    <!-- SUBMISSION FORM -->
+
+    <main class="card">
+
+        <h2 class="card-title">
+            📡 Submit Channel Information
+        </h2>
+
+        <p class="subtitle">
+            Share new TV channels, M3U8 streams
+            and IPTV playlists with KB TV PRO.
+        </p>
+
+        <form id="submitForm">
+
+            <label for="channelName">
+                📺 Channel Name *
+            </label>
+
+            <input
+                type="text"
+                id="channelName"
+                placeholder="Example: Nagorik TV"
+                maxlength="100"
+                required
+            >
+
+            <label for="m3u8">
+                🔗 M3U8 Stream URL
+            </label>
+
+            <input
+                type="url"
+                id="m3u8"
+                placeholder="https://example.com/live/index.m3u8"
+            >
+
+            <label for="logo">
+                🖼️ Channel Logo URL
+            </label>
+
+            <input
+                type="url"
+                id="logo"
+                placeholder="https://example.com/logo.png"
+            >
+
+            <div class="preview-box" id="previewBox">
+
+                <img id="logoPreview" alt="Logo Preview">
+
+                <span>Channel Logo Preview</span>
+
+            </div>
+
+            <label for="playlist">
+                📂 M3U / M3U8 Playlist URL
+            </label>
+
+            <input
+                type="url"
+                id="playlist"
+                placeholder="https://example.com/playlist.m3u"
+            >
+
+            <label for="message">
+                📝 Additional Information
+            </label>
+
+            <textarea
+                id="message"
+                placeholder="Write channel information or additional details..."
+                maxlength="1000"
+            ></textarea>
+
+            <button
+                type="submit"
+                class="submit-btn"
+                id="submitBtn"
+            >
+                🚀 SUBMIT INFORMATION
+            </button>
+
+        </form>
+
+        <div id="status" class="status" role="status"></div>
+
+    </main>
+
+
+    <!-- INFORMATION -->
+
+    <section class="info">
+
+        <h3>💡 SHARE YOUR IPTV LINKS</h3>
+
+        <p>
+            আপনার কাছে নতুন কোনো TV Channel,
+            M3U8 Stream অথবা Playlist থাকলে
+            আমাদের সঙ্গে শেয়ার করুন।
+            <br><br>
+            আপনার সহযোগিতাই KB TV PRO-কে
+            আরও সমৃদ্ধ করবে! ❤️
+        </p>
+
+    </section>
+
+
+    <!-- FOOTER -->
+
+    <footer class="footer">
+
+        <strong>POWERED BY KB TV PRO ❤️</strong>
+
+        <p>
+            Make by: <b>KALLYAN BISWAS</b>
+        </p>
+
+        <div class="social">
+
+            <a
+                href="https://www.facebook.com/kallyan.biswas.29"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                FACEBOOK
+            </a>
+
+            <a
+                href="https://t.me/iptvlinksm3u8"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                TELEGRAM
+            </a>
+
+        </div>
+
+        <p>
+            © <span id="year"></span> KB TV PRO.
+            All Rights Reserved.
+        </p>
+
+    </footer>
+
+</div>
+
+
+<script>
+
+/* ==================================
+   GOOGLE APPS SCRIPT CONFIGURATION
+================================== */
+
+// এখানে তোমার Apps Script Web App URL বসাবে।
+
+const SCRIPT_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL";
+
+
+/* ==================================
+   ELEMENTS
+================================== */
+
+const form = document.getElementById("submitForm");
+
+const submitBtn = document.getElementById("submitBtn");
+
+const statusBox = document.getElementById("status");
+
+const logoInput = document.getElementById("logo");
+
+const previewBox = document.getElementById("previewBox");
+
+const logoPreview = document.getElementById("logoPreview");
+
+
+/* ==================================
+   FOOTER YEAR
+================================== */
+
+document.getElementById("year").textContent =
+    new Date().getFullYear();
+
+
+/* ==================================
+   LOGO PREVIEW
+================================== */
+
+logoInput.addEventListener("input", function() {
+
+    const url = logoInput.value.trim();
+
+    previewBox.style.display = "none";
+
+    if (!url) return;
+
+    try {
+
+        const parsed = new URL(url);
+
+        if (parsed.protocol !== "https:" &&
+            parsed.protocol !== "http:") return;
+
+        logoPreview.onload = function() {
+            previewBox.style.display = "flex";
+        };
+
+        logoPreview.onerror = function() {
+            previewBox.style.display = "none";
+        };
+
+        logoPreview.src = url;
+
+    } catch(e) {
+
+        previewBox.style.display = "none";
+
+    }
+
+});
+
+
+/* ==================================
+   URL VALIDATION
+================================== */
+
+function validURL(value) {
+
+    if (!value) return true;
+
+    try {
+
+        const url = new URL(value);
+
+        return url.protocol === "https:" ||
+               url.protocol === "http:";
+
+    } catch(e) {
+
+        return false;
+
+    }
+
+}
+
+
+/* ==================================
+   STATUS MESSAGE
+================================== */
+
+function showStatus(message, type) {
+
+    statusBox.className = "status " + type;
+
+    statusBox.textContent = message;
+
+}
+
+
+/* ==================================
+   SUBMISSION SYSTEM
+================================== */
+
+form.addEventListener("submit", async function(e) {
+
+    e.preventDefault();
+
+    const data = {
+
+        channelName:
+            document.getElementById("channelName").value.trim(),
+
+        m3u8:
+            document.getElementById("m3u8").value.trim(),
+
+        logo:
+            document.getElementById("logo").value.trim(),
+
+        playlist:
+            document.getElementById("playlist").value.trim(),
+
+        message:
+            document.getElementById("message").value.trim()
+
+    };
+
+
+    /* REQUIRED VALIDATION */
+
+    if (!data.channelName) {
+
+        showStatus(
+            "❌ Please enter Channel Name.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    if (!data.m3u8 && !data.playlist) {
+
+        showStatus(
+            "❌ Enter an M3U8 Stream or Playlist URL.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    if (
+        !validURL(data.m3u8) ||
+        !validURL(data.logo) ||
+        !validURL(data.playlist)
+    ) {
+
+        showStatus(
+            "❌ Please enter valid HTTP or HTTPS URLs.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    /* BACKEND CHECK */
+
+    if (!SCRIPT_URL.startsWith("https://script.google.com/")) {
+
+        showStatus(
+            "⚙️ Google Apps Script URL is not configured.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    /* SUBMIT */
+
+    submitBtn.disabled = true;
+
+    submitBtn.textContent = "⏳ SUBMITTING...";
+
+    statusBox.style.display = "none";
+
+
+    try {
+
+        const response = await fetch(SCRIPT_URL, {
+
+            method: "POST",
+
+            redirect: "follow",
+
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8"
+            },
+
+            body: JSON.stringify(data)
+
+        });
+
+
+        const result = await response.json();
+
+        if (!result.success) {
+
+            throw new Error(
+                result.error || "Submission failed."
+            );
+
+        }
+
+
+        showStatus(
+            "✅ Successfully submitted! Your information has been saved.",
+            "success"
+        );
+
+        form.reset();
+
+        previewBox.style.display = "none";
+
+
+    } catch(error) {
+
+        showStatus(
+            "❌ Submission could not be confirmed. Please check your connection and try again. " +
+            error.message,
+            "error"
+        );
+
+    } finally {
+
+        submitBtn.disabled = false;
+
+        submitBtn.textContent = "🚀 SUBMIT INFORMATION";
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>
