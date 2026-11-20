@@ -3,150 +3,245 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#080b12">
+<meta name="theme-color" content="#000000">
 <title>KB TV PRO | Live TV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
+
+/* ===== MOBILE THEME (default, neon green) ===== */
 :root{
-  --bg:#080b12;--panel:#101725;--card:#141d2b;--line:#273448;
-  --accent:#ff3030;--text:#fff;--muted:#8d99ad;--radius:14px;
+  --bg:#000;--panel:#050a05;--card:#0a130b;--card-hi:#0f1d11;
+  --line:#143014;--accent:#39ff14;--accent-dim:#1f8a0b;
+  --text:#fff;--muted:#6f8a6f;--danger:#ff5252;
+  --name-font:"Share Tech Mono",ui-monospace,Menlo,Consolas,monospace;
+  --logo-font:"Orbitron",system-ui,sans-serif;
+  --radius:14px;
 }
+html{scroll-behavior:smooth}
 body{
   background:var(--bg);color:var(--text);
   font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
   min-height:100vh;display:flex;flex-direction:column;
   -webkit-text-size-adjust:100%;
+  -webkit-tap-highlight-color:transparent;
 }
 .hidden{display:none !important}
-
-/* Top bar */
-.topbar{
-  position:sticky;top:0;z-index:20;height:56px;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 16px;background:rgba(16,23,37,.96);
-  backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
+button:focus-visible,.ch-main:focus-visible,input:focus-visible,select:focus-visible{
+  outline:2px solid var(--accent);outline-offset:2px;
 }
-.logo{font-size:22px;font-weight:900;color:var(--accent);letter-spacing:.5px}
+
+/* ----- Top bar ----- */
+.topbar{
+  position:sticky;top:0;z-index:30;height:56px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;background:rgba(0,0,0,.92);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border-bottom:2px solid var(--accent);
+}
+.logo{font-family:var(--logo-font);font-size:20px;font-weight:900;color:var(--accent);letter-spacing:1px;text-shadow:0 0 12px rgba(57,255,20,.5)}
 .logo span{color:#fff}
 .live-pill{
   display:inline-flex;align-items:center;gap:6px;
-  font-size:12px;font-weight:700;color:#ff6b6b;
-  background:rgba(255,48,48,.12);padding:5px 10px;border-radius:999px;
+  font-size:11px;font-weight:700;letter-spacing:1px;color:#ff6b6b;
+  border:1px solid rgba(255,82,82,.45);padding:5px 10px;border-radius:999px;
 }
-.live-pill i{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulse 1.4s infinite}
-@keyframes pulse{50%{opacity:.3}}
+.live-pill i{width:7px;height:7px;border-radius:50%;background:var(--danger);box-shadow:0 0 8px var(--danger);animation:pulse 1.4s infinite}
+@keyframes pulse{50%{opacity:.25}}
 
-/* Layout */
-.layout{
-  flex:1;width:100%;max-width:1400px;margin:0 auto;
-  padding:12px;display:grid;gap:16px;
+/* ----- Layout ----- */
+.layout{flex:1;width:100%;max-width:1400px;margin:0 auto;display:flex;flex-direction:column}
+.player-col{
+  position:sticky;top:56px;z-index:25;background:var(--bg);
+  box-shadow:0 6px 16px rgba(0,0,0,.7);
 }
 
-/* Player */
-.player-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+/* ----- Player ----- */
 .video-wrap{position:relative;background:#000;aspect-ratio:16/9}
 video{width:100%;height:100%;display:block;background:#000}
 .overlay{
   position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  text-align:center;padding:20px;color:var(--muted);
-  background:radial-gradient(circle at center,#151d2e,#000);
+  text-align:center;padding:20px;color:var(--muted);font-size:14px;
+  background:radial-gradient(circle at center,#0d1a0d,#000);
 }
 .overlay.hidden{display:none}
-.now{display:flex;align-items:center;gap:10px;padding:12px}
+
+/* ----- Now playing bar (like the reference screenshot) ----- */
+.now{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  background:#000;border-bottom:2px solid var(--accent);
+}
+.on-badge{
+  flex:none;font-family:var(--logo-font);font-size:11px;font-weight:700;
+  color:var(--muted);border:1px solid #2a3a2a;border-radius:6px;padding:6px 8px;
+  transition:.2s;
+}
+.on-badge.live{color:var(--accent);border-color:var(--accent);box-shadow:0 0 10px rgba(57,255,20,.35)}
 .now-text{flex:1;min-width:0}
-.now-text h1{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.now-text p{font-size:12px;color:var(--muted);margin-top:2px}
-.status{padding:0 14px 14px;font-size:13px;color:var(--muted);min-height:20px}
-.status.error{color:#ff8a8a}
-.retry{
-  margin-left:8px;background:var(--accent);color:#fff;border:0;
-  border-radius:8px;padding:6px 12px;font:inherit;cursor:pointer;
+.now-text h1{
+  font-family:var(--logo-font);font-size:15px;font-weight:700;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-
-/* Buttons & inputs */
-.btn-icon{
-  width:44px;height:44px;flex:none;border-radius:10px;
+.now-text p{font-family:var(--name-font);font-size:11px;color:var(--muted);margin-top:2px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill{
+  flex:none;font-family:var(--logo-font);font-size:11px;font-weight:700;
+  color:#000;background:var(--accent);border-radius:8px;padding:7px 10px;
+}
+.icon-btn{
+  flex:none;width:40px;height:40px;border-radius:10px;cursor:pointer;
   border:1px solid var(--line);background:var(--card);color:#fff;
-  font-size:20px;cursor:pointer;display:grid;place-items:center;
+  font-size:18px;display:grid;place-items:center;transition:transform .1s;
 }
-.btn-icon:disabled{opacity:.5;cursor:default}
-.btn-icon:active{transform:scale(.96)}
-@media (hover:hover){ .btn-icon:hover{border-color:var(--accent)} }
-button:focus-visible,.ch:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.icon-btn:active{transform:scale(.94)}
+.icon-btn:disabled{opacity:.35;cursor:default}
+.icon-btn.fav-on{color:#ffd400;border-color:#6b5a00}
 
-.toolbar{display:grid;grid-template-columns:1fr auto;gap:10px}
-.search{position:relative;grid-column:1/-1}
+.status{
+  padding:8px 12px;font-family:var(--name-font);font-size:12px;color:var(--muted);
+  min-height:30px;background:#000;display:flex;align-items:center;flex-wrap:wrap;gap:6px;
+}
+.status.error{color:#ff8a8a}
+.retry{background:var(--danger);color:#fff;border:0;border-radius:8px;padding:5px 12px;font:inherit;font-size:12px;cursor:pointer}
+
+/* ----- Toolbar ----- */
+.toolbar{display:flex;gap:8px;padding:12px 12px 0}
+.search{position:relative;flex:1;min-width:0}
 .search input{
-  width:100%;height:46px;padding:0 44px 0 14px;border-radius:12px;
+  width:100%;height:44px;padding:0 40px 0 14px;border-radius:12px;
   border:1px solid var(--line);background:var(--card);color:#fff;
   font:inherit;outline:none;
 }
+.search input::placeholder{color:var(--muted)}
 .search input:focus{border-color:var(--accent)}
 .search .clear{
-  position:absolute;right:4px;top:50%;transform:translateY(-50%);
-  width:38px;height:38px;border:0;background:none;color:var(--muted);
-  font-size:16px;cursor:pointer;
+  position:absolute;right:2px;top:50%;transform:translateY(-50%);
+  width:38px;height:38px;border:0;background:none;color:var(--muted);font-size:15px;cursor:pointer;
 }
 select{
-  height:44px;padding:0 12px;border-radius:12px;min-width:0;
-  border:1px solid var(--line);background:var(--card);color:#fff;
-  font:inherit;outline:none;
+  display:none;height:44px;padding:0 12px;border-radius:12px;min-width:0;
+  border:1px solid var(--line);background:var(--card);color:#fff;font:inherit;outline:none;
 }
-select:focus{border-color:var(--accent)}
 
-/* Channel list */
+/* ----- Category chips (mobile) ----- */
+.chips{
+  display:flex;gap:8px;overflow-x:auto;padding:12px 12px 4px;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch;
+}
+.chips::-webkit-scrollbar{display:none}
+.chip{
+  flex:none;font-family:var(--name-font);font-size:12px;text-transform:uppercase;
+  color:var(--muted);background:var(--card);border:1px solid var(--line);
+  padding:7px 12px;border-radius:999px;cursor:pointer;white-space:nowrap;
+}
+.chip.active{color:#000;background:var(--accent);border-color:var(--accent);font-weight:700}
+
+/* ----- Channel list ----- */
 .list-head{
   display:flex;justify-content:space-between;align-items:center;
-  margin:14px 2px 10px;font-size:13px;color:var(--muted);
+  padding:10px 14px 6px;font-family:var(--name-font);font-size:12px;color:var(--muted);text-transform:uppercase;
 }
-.channel-list{display:flex;flex-direction:column;gap:8px}
+.channel-list{display:flex;flex-direction:column;padding-bottom:90px}
 .ch{
-  display:grid;grid-template-columns:52px minmax(0,1fr) auto;align-items:center;
-  gap:12px;width:100%;min-height:68px;padding:8px 12px;
-  background:var(--card);border:1px solid var(--line);border-radius:12px;
-  color:inherit;font:inherit;text-align:left;cursor:pointer;
-  transition:border-color .15s,background .15s;
+  display:flex;align-items:center;gap:6px;
+  border-bottom:1px solid var(--line);
+  transition:background .15s;
 }
-.ch:active{transform:scale(.99)}
-.ch.active{border-color:var(--accent);background:#1a1420}
-@media (hover:hover){ .ch:hover{border-color:#3b4a66} }
+.ch.active{background:linear-gradient(90deg,rgba(57,255,20,.14),rgba(57,255,20,.02));box-shadow:inset 3px 0 0 var(--accent)}
+.ch-main{
+  flex:1;min-width:0;display:grid;grid-template-columns:60px minmax(0,1fr);align-items:center;gap:14px;
+  padding:12px 4px 12px 14px;background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer;
+}
+.ch-main:active{background:rgba(57,255,20,.06)}
 .thumb{
-  width:52px;height:52px;border-radius:10px;background:#fff;
-  object-fit:contain;padding:5px;display:block;
+  width:60px;height:60px;border-radius:12px;background:#fff;
+  object-fit:contain;padding:6px;display:block;
 }
 .thumb.fallback{
   display:grid;place-items:center;padding:0;
-  background:#1f2a3d;color:#c9d3e3;font-weight:800;font-size:14px;
+  background:#0f1d11;color:var(--accent);font-family:var(--logo-font);font-weight:900;font-size:16px;
+  border:1px solid var(--line);
 }
-.ch-text{min-width:0}
-.ch-name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ch-group{font-size:12px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ch-name{
+  font-family:var(--name-font);font-size:16px;color:var(--accent);text-transform:uppercase;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.3px;
+}
+.ch.active .ch-name{text-shadow:0 0 8px rgba(57,255,20,.6)}
+.ch-group{
+  font-family:var(--name-font);font-size:12px;color:var(--muted);text-transform:uppercase;
+  margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
 .tag{
-  display:none;font-size:11px;font-weight:700;color:#fff;
-  background:var(--accent);padding:4px 8px;border-radius:999px;
+  display:none;flex:none;font-size:10px;font-weight:700;color:#000;
+  background:var(--accent);padding:3px 7px;border-radius:999px;margin-top:4px;
 }
 .ch.active .tag{display:inline-block}
-.empty{text-align:center;color:var(--muted);padding:30px 0}
+.ch .tag{margin-left:6px}
+.star{
+  flex:none;width:44px;height:44px;margin-right:6px;border:0;background:none;
+  color:#3b4a3b;font-size:20px;cursor:pointer;
+}
+.star.on{color:#ffd400}
+.empty{text-align:center;color:var(--muted);padding:40px 16px;font-size:14px}
+
+/* ----- Scroll to top FAB ----- */
+.top-fab{
+  position:fixed;right:16px;bottom:22px;z-index:40;
+  width:54px;height:54px;border-radius:50%;border:2px solid var(--accent);
+  background:rgba(0,0,0,.85);color:var(--accent);font-size:20px;cursor:pointer;
+  box-shadow:0 0 14px rgba(57,255,20,.35);
+  opacity:0;transform:translateY(20px);pointer-events:none;transition:.25s;
+}
+.top-fab.show{opacity:1;transform:none;pointer-events:auto}
 
 footer{
-  margin-top:auto;text-align:center;padding:18px;
-  color:#6b778b;font-size:12px;
+  text-align:center;padding:18px;color:#4f604f;font-size:11px;letter-spacing:.5px;
+  font-family:var(--name-font);
 }
 
-/* Desktop */
+/* ===== DESKTOP (PC) — kept as approved ===== */
 @media (min-width:960px){
+  :root{
+    --bg:#080b12;--panel:#101725;--card:#141d2b;--card-hi:#1a1420;
+    --line:#273448;--accent:#ff3030;--accent-dim:#b91c2c;
+    --muted:#8d99ad;--name-font:inherit;--logo-font:inherit;
+  }
+  .topbar{height:65px;padding:0 5%;background:#101725;border-bottom:1px solid #252d3c;box-shadow:none}
+  .logo{font-size:23px;font-weight:900;text-shadow:none;color:var(--accent)}
+  .logo span{color:#fff}
   .layout{
-    grid-template-columns:minmax(0,1fr) 380px;
+    max-width:1450px;display:grid;grid-template-columns:minmax(0,1fr) 380px;
     align-items:start;padding:24px;gap:24px;
   }
-  .now-text h1{font-size:22px}
-  .list-col{
-    position:sticky;top:80px;display:flex;flex-direction:column;
-    max-height:calc(100vh - 104px);
-  }
-  .channel-list{overflow-y:auto;flex:1;min-height:0;padding-right:4px}
-  .ch{min-height:64px}
+  .player-col{position:static;box-shadow:none;background:none}
+  .player-card{background:#111827;border:1px solid #263246;border-radius:15px;overflow:hidden}
+  .now{background:none;border:0;padding:15px}
+  .now-text h1{font-size:20px;font-family:inherit}
+  .now-text p{font-family:inherit;font-size:12px;color:var(--muted)}
+  .on-badge,.pill{display:none}
+  .status{background:none;padding:0 15px 14px;font-family:inherit;font-size:13px;min-height:20px}
+  .toolbar{padding:0 0 4px;gap:10px}
+  .search input{height:46px}
+  select{display:block;height:46px}
+  .chips{display:none}
+  .list-col{position:sticky;top:90px;display:flex;flex-direction:column;max-height:calc(100vh - 114px)}
+  .list-head{padding:12px 2px 8px;font-family:inherit;font-size:13px;text-transform:none}
+  .channel-list{overflow-y:auto;flex:1;min-height:0;padding:0 4px 0 0;padding-bottom:0}
+  .ch{border:1px solid var(--line);border-radius:12px;margin-bottom:8px;background:var(--card)}
+  .ch.active{background:#1a1420;border-color:var(--accent);box-shadow:none}
+  .ch-main{grid-template-columns:52px minmax(0,1fr);padding:8px 4px 8px 10px;gap:12px}
+  .thumb{width:52px;height:52px;padding:5px;border-radius:10px}
+  .thumb.fallback{background:#1f2a3d;color:#c9d3e3;font-family:inherit;font-size:14px;border:0}
+  .ch-name{font-family:inherit;font-size:15px;color:#fff;text-transform:none;letter-spacing:0}
+  .ch-group{font-family:inherit;font-size:12px;text-transform:none;color:var(--muted)}
+  .tag{background:var(--accent);color:#fff}
+  .star{width:36px;height:36px;font-size:17px;color:#3c4a60}
+  .star.on{color:#ffd400}
+  .top-fab{display:none}
+  footer{font-family:inherit;color:#778397;font-size:12px;letter-spacing:0;padding:25px}
+  .layout + footer{margin-top:0}
 }
 </style>
 </head>
@@ -163,16 +258,20 @@ footer{
     <div class="player-card">
       <div class="video-wrap">
         <video id="video" controls playsinline preload="metadata"></video>
-        <div id="overlay" class="overlay">Pick a channel below to start watching.</div>
+        <div id="overlay" class="overlay">Pick a channel below to start watching</div>
       </div>
+
       <div class="now">
-        <button id="prev" class="btn-icon" aria-label="Previous channel" disabled>‹</button>
+        <span id="onBadge" class="on-badge">OFF</span>
         <div class="now-text">
           <h1 id="nowName">Select a channel</h1>
           <p id="nowGroup">—</p>
         </div>
-        <button id="next" class="btn-icon" aria-label="Next channel" disabled>›</button>
+        <button id="favNow" class="icon-btn" aria-label="Favourite this channel" disabled>☆</button>
+        <button id="prev" class="icon-btn" aria-label="Previous channel" disabled>‹</button>
+        <button id="next" class="icon-btn" aria-label="Next channel" disabled>›</button>
       </div>
+
       <div id="status" class="status" role="status" aria-live="polite">Loading playlist…</div>
     </div>
   </section>
@@ -180,46 +279,62 @@ footer{
   <section class="list-col">
     <div class="toolbar">
       <div class="search">
-        <input id="search" type="search" placeholder="Search channels" autocomplete="off" aria-label="Search channels">
+        <input id="search" type="search" placeholder="Search channels…" autocomplete="off" aria-label="Search channels">
         <button id="clear" class="clear hidden" aria-label="Clear search">✕</button>
       </div>
       <select id="category" aria-label="Filter by category">
         <option value="all">All categories</option>
       </select>
-      <button id="refresh" class="btn-icon" aria-label="Refresh playlist">↻</button>
+      <button id="refresh" class="icon-btn" aria-label="Refresh playlist">↻</button>
     </div>
-    <div class="list-head"><span id="count">0 channels</span></div>
+
+    <div id="chips" class="chips" role="tablist" aria-label="Categories"></div>
+
+    <div class="list-head"><span id="count">0 channels</span><span id="shown"></span></div>
     <div id="channels" class="channel-list"></div>
   </section>
 
 </main>
 
-<footer>
-  KB TV PRO © 2026<br>Powered by KB CYBER TEAM
-</footer>
+<footer>KB TV PRO © 2026 · Powered by KB CYBER TEAM</footer>
+
+<button id="topBtn" class="top-fab" aria-label="Back to top">▲</button>
 
 <script>
 const PLAYLIST_URL =
   "https://raw.githubusercontent.com/Mrbotrx/VIP-m3u-playlist/refs/heads/main/Vip%20playlists/vip_kbpro.m3u8";
+const FAV_KEY = "kbtv-favs";
+const LAST_KEY = "kbtv-last";
+const FAV_CAT = "__fav__";
 
 const $ = id => document.getElementById(id);
-const video = $("video");
-const overlay = $("overlay");
-const statusEl = $("status");
-const listEl = $("channels");
-const searchEl = $("search");
-const clearBtn = $("clear");
-const catEl = $("category");
-const countEl = $("count");
-const refreshBtn = $("refresh");
-const prevBtn = $("prev");
-const nextBtn = $("next");
+const video = $("video"), overlay = $("overlay"), statusEl = $("status");
+const listEl = $("channels"), searchEl = $("search"), clearBtn = $("clear");
+const catEl = $("category"), chipsEl = $("chips"), countEl = $("count");
+const shownEl = $("shown"), refreshBtn = $("refresh"), prevBtn = $("prev");
+const nextBtn = $("next"), favNowBtn = $("favNow"), topBtn = $("topBtn");
+const onBadge = $("onBadge");
 
 let channels = [];
-let visible = [];      // indexes into channels
-let current = -1;      // index of playing channel
-let currentUrl = "";   // remembered so the index survives a refresh
+let visible = [];
+let current = -1;
 let hls = null;
+let favs = loadFavs();
+
+/* ---------- Storage ---------- */
+function loadFavs() {
+  try { return new Set(JSON.parse(localStorage.getItem(FAV_KEY) || "[]")); }
+  catch { return new Set(); }
+}
+function saveFavs() {
+  try { localStorage.setItem(FAV_KEY, JSON.stringify([...favs])); } catch {}
+}
+function saveLast(url) {
+  try { localStorage.setItem(LAST_KEY, url); } catch {}
+}
+function readLast() {
+  try { return localStorage.getItem(LAST_KEY) || ""; } catch { return ""; }
+}
 
 /* ---------- Status ---------- */
 function setStatus(msg, { error = false, retry = null } = {}) {
@@ -230,8 +345,8 @@ function setStatus(msg, { error = false, retry = null } = {}) {
     b.type = "button";
     b.className = "retry";
     b.textContent = "Retry";
-    b.onclick = () => retry();
-    statusEl.append(" ", b);
+    b.onclick = retry;
+    statusEl.append(b);
   }
 }
 
@@ -265,7 +380,7 @@ function parsePlaylist(text) {
 }
 
 /* ---------- Thumbnails ---------- */
-function makeInitials(name) {
+function initials(name) {
   const s = document.createElement("span");
   s.className = "thumb fallback";
   s.textContent = name.split(/\s+/).filter(Boolean).slice(0, 2)
@@ -273,36 +388,55 @@ function makeInitials(name) {
   return s;
 }
 
-function makeThumb(ch) {
-  if (!ch.logo) return makeInitials(ch.name);
+function thumb(ch) {
+  if (!ch.logo) return initials(ch.name);
   const img = document.createElement("img");
   img.className = "thumb";
   img.alt = "";
   img.loading = "lazy";
   img.decoding = "async";
-  img.onerror = () => img.replaceWith(makeInitials(ch.name));
+  img.onerror = () => img.replaceWith(initials(ch.name));
   img.src = ch.logo;
   return img;
 }
 
-/* ---------- Categories, filtering, rendering ---------- */
+/* ---------- Categories & chips ---------- */
 function buildCategories() {
   const prev = catEl.value;
-  const cats = [...new Set(channels.map(c => c.group))]
-    .sort((a, b) => a.localeCompare(b));
-  catEl.replaceChildren(
-    new Option("All categories", "all"),
-    ...cats.map(c => new Option(c, c))
-  );
-  catEl.value = (prev === "all" || cats.includes(prev)) ? prev : "all";
+  const groups = [...new Set(channels.map(c => c.group))].sort((a, b) => a.localeCompare(b));
+  const cats = [["all", "All"], [FAV_CAT, "★ Favourites"], ...groups.map(g => [g, g])];
+
+  catEl.replaceChildren(...cats.map(([v, l]) => new Option(l, v)));
+  catEl.value = cats.some(([v]) => v === prev) ? prev : "all";
+
+  chipsEl.replaceChildren(...cats.map(([v, l]) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip";
+    b.dataset.cat = v;
+    b.textContent = l;
+    b.setAttribute("role", "tab");
+    return b;
+  }));
+  syncChips();
 }
 
+function syncChips() {
+  chipsEl.querySelectorAll(".chip").forEach(c => {
+    const on = c.dataset.cat === catEl.value;
+    c.classList.toggle("active", on);
+    c.setAttribute("aria-selected", on);
+  });
+}
+
+/* ---------- Filter & render ---------- */
 function applyFilter() {
   const q = searchEl.value.trim().toLowerCase();
   const cat = catEl.value;
   visible = [];
   channels.forEach((c, i) => {
-    if (cat !== "all" && c.group !== cat) return;
+    if (cat === FAV_CAT && !favs.has(c.url)) return;
+    if (cat !== "all" && cat !== FAV_CAT && c.group !== cat) return;
     if (q && !c.name.toLowerCase().includes(q) && !c.group.toLowerCase().includes(q)) return;
     visible.push(i);
   });
@@ -310,8 +444,11 @@ function applyFilter() {
 
 function render() {
   applyFilter();
+  syncChips();
   clearBtn.classList.toggle("hidden", !searchEl.value);
+
   countEl.textContent = `${visible.length} ${visible.length === 1 ? "channel" : "channels"}`;
+  shownEl.textContent = favs.size ? `★ ${favs.size} saved` : "";
   prevBtn.disabled = nextBtn.disabled = !visible.length;
 
   const frag = document.createDocumentFragment();
@@ -319,22 +456,27 @@ function render() {
   if (!visible.length) {
     const p = document.createElement("p");
     p.className = "empty";
-    p.textContent = channels.length
-      ? "No channels match your search."
-      : "No channels yet.";
+    p.textContent = !channels.length ? "No channels yet."
+      : catEl.value === FAV_CAT ? "No favourites yet. Tap ☆ on a channel to save it."
+      : "No channels match your search.";
     frag.append(p);
   }
 
   for (const i of visible) {
     const ch = channels[i];
+    const isFav = favs.has(ch.url);
 
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "ch" + (i === current ? " active" : "");
-    btn.dataset.index = i;
+    const row = document.createElement("div");
+    row.className = "ch" + (i === current ? " active" : "");
+
+    const main = document.createElement("button");
+    main.type = "button";
+    main.className = "ch-main";
+    main.dataset.index = i;
 
     const text = document.createElement("div");
     text.className = "ch-text";
+    text.style.minWidth = "0";
 
     const name = document.createElement("div");
     name.className = "ch-name";
@@ -344,35 +486,75 @@ function render() {
     grp.className = "ch-group";
     grp.textContent = ch.group;
 
-    text.append(name, grp);
-
     const tag = document.createElement("span");
     tag.className = "tag";
-    tag.textContent = "Playing";
+    tag.textContent = "● Playing";
 
-    btn.append(makeThumb(ch), text, tag);
-    frag.append(btn);
+    text.append(name, grp, tag);
+    main.append(thumb(ch), text);
+
+    const star = document.createElement("button");
+    star.type = "button";
+    star.className = "star" + (isFav ? " on" : "");
+    star.dataset.fav = i;
+    star.setAttribute("aria-label", isFav ? "Remove from favourites" : "Add to favourites");
+    star.textContent = isFav ? "★" : "☆";
+
+    row.append(main, star);
+    frag.append(row);
   }
 
   listEl.replaceChildren(frag);
+  updateNowFav();
 }
 
-function markActive() {
-  listEl.querySelectorAll(".ch.active").forEach(b => b.classList.remove("active"));
-  const btn = listEl.querySelector(`.ch[data-index="${current}"]`);
-  if (btn) btn.classList.add("active");
+function updateNowFav() {
+  const ch = channels[current];
+  const on = !!ch && favs.has(ch.url);
+  favNowBtn.textContent = on ? "★" : "☆";
+  favNowBtn.classList.toggle("fav-on", on);
+  favNowBtn.disabled = !ch;
+}
+
+function toggleFav(i) {
+  const ch = channels[i];
+  if (!ch) return;
+  favs.has(ch.url) ? favs.delete(ch.url) : favs.add(ch.url);
+  saveFavs();
+  render();
 }
 
 /* ---------- Playback ---------- */
+function setNow(i) {
+  const ch = channels[i];
+  $("nowName").textContent = ch.name;
+  $("nowGroup").textContent = ch.group;
+}
+
+function setLive(on) {
+  onBadge.textContent = on ? "ON" : "OFF";
+  onBadge.classList.toggle("live", on);
+}
+
+function updateMediaSession(ch) {
+  if (!("mediaSession" in navigator)) return;
+  try {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: ch.name, artist: ch.group, album: "KB TV PRO",
+      artwork: ch.logo ? [{ src: ch.logo, sizes: "512x512" }] : []
+    });
+  } catch {}
+}
+
 function play(i) {
   if (i < 0 || i >= channels.length) return;
   current = i;
   const ch = channels[i];
-  currentUrl = ch.url;
-  $("nowName").textContent = ch.name;
-  $("nowGroup").textContent = ch.group;
+  setNow(i);
   overlay.classList.add("hidden");
-  markActive();
+  saveLast(ch.url);
+  updateMediaSession(ch);
+  render();
   loadStream(ch);
 }
 
@@ -395,11 +577,13 @@ function stopStream() {
 
 function failStream(ch, msg) {
   stopStream();
+  setLive(false);
   setStatus(msg, { error: true, retry: () => loadStream(ch) });
 }
 
 function loadStream(ch) {
   stopStream();
+  setLive(false);
   setStatus(`Connecting to ${ch.name}…`);
 
   const url = ch.url;
@@ -409,7 +593,7 @@ function loadStream(ch) {
     video.onerror = () => failStream(ch, `${ch.name} couldn't be played.`);
     video.src = url;
     video.play()
-      .then(() => setStatus(`Playing ${ch.name}`))
+      .then(() => { setLive(true); setStatus(`Playing ${ch.name}`); })
       .catch(() => setStatus(`Ready. Press play to start ${ch.name}.`));
     return;
   }
@@ -419,6 +603,7 @@ function loadStream(ch) {
     hls = player;
 
     player.on(Hls.Events.MANIFEST_PARSED, () => {
+      setLive(true);
       setStatus(`Playing ${ch.name}`);
       video.play().catch(() => {});
     });
@@ -439,6 +624,7 @@ function loadStream(ch) {
     video.onerror = () => failStream(ch, `${ch.name} couldn't be played.`);
     video.src = url;
     video.play().catch(() => {});
+    setLive(true);
     setStatus(`Playing ${ch.name}`);
 
   } else {
@@ -460,23 +646,55 @@ async function loadPlaylist() {
     if (!parsed.length) throw new Error("no channels found");
 
     channels = parsed;
-    current = currentUrl ? channels.findIndex(c => c.url === currentUrl) : -1;
+
+    // keep the playing channel index after a refresh
+    const playingUrl = current >= 0 && channels.length ? null : null;
+    const keepUrl = current >= 0 ? (currentUrlOf() || "") : "";
+    current = keepUrl ? channels.findIndex(c => c.url === keepUrl) : -1;
+
+    // restore last channel (display only, no autoplay — browsers block sound)
+    if (current < 0) {
+      const last = readLast();
+      const idx = channels.findIndex(c => c.url === last);
+      if (idx >= 0) {
+        current = idx;
+        setNow(idx);
+        overlay.classList.add("hidden");
+        overlay.textContent = "";
+      }
+    }
+
     buildCategories();
     render();
-    setStatus(`${channels.length} channels loaded. Pick one to start watching.`);
+    setStatus(`${channels.length} channels loaded. Tap one to start watching.`);
   } catch (err) {
-    setStatus(`Couldn't load the channel list (${err.message}). Check your connection.`,
+    setStatus(`Couldn't load the channel list (${err.message}).`,
       { error: true, retry: loadPlaylist });
   } finally {
     refreshBtn.disabled = false;
   }
 }
 
+function currentUrlOf() {
+  return channels[current] ? channels[current].url : "";
+}
+
 /* ---------- Events ---------- */
 listEl.addEventListener("click", e => {
-  const btn = e.target.closest(".ch");
-  if (btn) play(Number(btn.dataset.index));
+  const star = e.target.closest(".star");
+  if (star) { toggleFav(Number(star.dataset.fav)); return; }
+  const main = e.target.closest(".ch-main");
+  if (main) play(Number(main.dataset.index));
 });
+
+chipsEl.addEventListener("click", e => {
+  const chip = e.target.closest(".chip");
+  if (!chip) return;
+  catEl.value = chip.dataset.cat;
+  render();
+  chip.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+});
+
 searchEl.addEventListener("input", render);
 clearBtn.addEventListener("click", () => {
   searchEl.value = "";
@@ -487,6 +705,17 @@ catEl.addEventListener("change", render);
 refreshBtn.addEventListener("click", loadPlaylist);
 prevBtn.addEventListener("click", () => step(-1));
 nextBtn.addEventListener("click", () => step(1));
+favNowBtn.addEventListener("click", () => { if (current >= 0) toggleFav(current); });
+
+window.addEventListener("scroll", () => {
+  topBtn.classList.toggle("show", window.scrollY > 400);
+}, { passive: true });
+topBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+
+if ("mediaSession" in navigator) {
+  navigator.mediaSession.setActionHandler("previoustrack", () => step(-1));
+  navigator.mediaSession.setActionHandler("nexttrack", () => step(1));
+}
 
 loadPlaylist();
 </script>
