@@ -2,7 +2,7 @@ name: Working M3U Update
 
 on:
   schedule:
-    - cron: '0 */1 * * *'
+    - cron: '0 */3 * * *'
   workflow_dispatch:
 
 permissions:
@@ -30,6 +30,7 @@ jobs:
           SRC_M3U_1: ${{ secrets.SRC_M3U_1 }}
           SRC_M3U_2: ${{ secrets.SRC_M3U_2 }}
           SRC_M3U_3: ${{ secrets.SRC_M3U_3 }}
+          SRC_M3U_4: ${{ secrets.SRC_M3U_4 }}
         run: python convert.py
 
       - name: Commit & Push
