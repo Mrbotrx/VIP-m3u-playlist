@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IND.bot | DTH Channel Directory</title>
+
+<style>
+:root {
+    --bg: #080d18;
+    --card: #111a2b;
+    --primary: #e50914;
+    --text: #ffffff;
+    --muted: #8b98ad;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: Arial, sans-serif;
+}
+
+/* HEADER */
+
+header {
+    background: linear-gradient(120deg,#171e32,#090e1b);
+    padding: 22px 5%;
+    border-bottom: 1px solid #26334a;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.logo {
+    font-size: 25px;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+.logo span {
+    color: var(--primary);
+}
+
+.status {
+    font-size: 12px;
+    color: #00df83;
+}
+
+/* HERO */
+
+.hero {
+    padding: 35px 5%;
+    background:
+    radial-gradient(circle at 80% 20%,#321321 0%,transparent 45%),
+    linear-gradient(120deg,#111b30,#080d18);
+}
+
+.hero h1 {
+    font-size: 30px;
+    margin-bottom: 10px;
+}
+
+.hero p {
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+/* STATS */
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 15px;
+    padding: 20px 5%;
+}
+
+.stat {
+    background: var(--card);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #243149;
+}
+
+.stat h2 {
+    color: var(--primary);
+    font-size: 25px;
+}
+
+.stat p {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 5px;
+}
+
+/* CONTROLS */
+
+.controls {
+    padding: 10px 5% 20px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+input, select {
+    background: #131d30;
+    border: 1px solid #293751;
+    color: white;
+    padding: 14px;
+    border-radius: 8px;
+    outline: none;
+}
+
+input {
+    flex: 1;
+    min-width: 180px;
+}
+
+select {
+    min-width: 150px;
+}
+
+/* CATEGORY */
+
+.section {
+    padding: 10px 5%;
+}
+
+.section-title {
+    font-size: 20px;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--primary);
+    padding-left: 12px;
+}
+
+.categories {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 15px;
+}
+
+.cat-btn {
+    background: #172238;
+    color: white;
+    border: 1px solid #293751;
+    padding: 10px 18px;
+    border-radius: 20px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.cat-btn.active {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+/* CHANNEL GRID */
+
+.channels {
+    padding: 10px 5% 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(155px,1fr));
+    gap: 15px;
+}
+
+.channel {
+    background: linear-gradient(145deg,#18243a,#101827);
+    border: 1px solid #27354e;
+    border-radius: 12px;
+    padding: 18px 10px;
+    text-align: center;
+    transition: .25s;
+    min-width: 0;
+}
+
+.channel:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+    box-shadow: 0 8px 25px #0008;
+}
+
+.channel img {
+    width: 75px;
+    height: 65px;
+    object-fit: contain;
+    margin-bottom: 12px;
+}
+
+.channel h3 {
+    font-size: 13px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.channel small {
+    display: inline-block;
+    margin-top: 9px;
+    background: #29364e;
+    color: #b8c5da;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 10px;
+}
+
+.loader {
+    text-align: center;
+    padding: 50px;
+    color: var(--muted);
+}
+
+.error {
+    color: #ff5964;
+    text-align: center;
+    padding: 30px;
+}
+
+footer {
+    background: #0d1524;
+    padding: 30px 5%;
+    text-align: center;
+    border-top: 1px solid #26334a;
+}
+
+footer p {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 2;
+}
+
+footer a {
+    color: #ff5964;
+    text-decoration: none;
+}
+
+@media(max-width:600px) {
+    .hero h1 {
+        font-size: 23px;
+    }
+
+    .stats {
+        gap: 8px;
+    }
+
+    .stat {
+        padding: 13px;
+    }
+
+    .stat h2 {
+        font-size: 20px;
+    }
+
+    .channels {
+        grid-template-columns: repeat(2,minmax(0,1fr));
+        gap: 10px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="header">
+        <div class="logo">IND<span>.bot</span></div>
+        <div class="status">● DIRECTORY ONLINE</div>
+    </div>
+</header>
+
+<section class="hero">
+    <h1>Indian TV Channel Directory</h1>
+    <p>
+        Explore your favourite Indian and Bangla TV channels.
+        Browse channels by category with a premium DTH experience.
+    </p>
+</section>
+
+<section class="stats">
+
+    <div class="stat">
+        <h2 id="total">0</h2>
+        <p>Total Channels</p>
+    </div>
+
+    <div class="stat">
+        <h2 id="categories">0</h2>
+        <p>Categories</p>
+    </div>
+
+    <div class="stat">
+        <h2 id="visible">0</h2>
+        <p>Showing</p>
+    </div>
+
+</section>
+
+<section class="controls">
+
+    <input
+        type="search"
+        id="search"
+        placeholder="Search channels..."
+    >
+
+    <select id="categorySelect">
+        <option value="all">All Categories</option>
+    </select>
+
+</section>
+
+<section class="section">
+
+    <h2 class="section-title">CHANNEL CATEGORIES</h2>
+
+    <div class="categories" id="categoryButtons">
+    </div>
+
+</section>
+
+<section class="section">
+    <h2 class="section-title">ALL TV CHANNELS</h2>
+</section>
+
+<div id="channelGrid" class="channels">
+    <div class="loader">Loading channels...</div>
+</div>
+
+<footer>
+
+    <p>
+        <strong>IND.bot</strong> | DTH Channel Directory
+    </p>
+
+    <p>Make by Kallyan Biswas</p>
+
+    <p>
+        Facebook:
+        <a href="https://www.facebook.com/kallyan.biswas.29"
+           target="_blank" rel="noopener">
+            Kallyan Biswas
+        </a>
+    </p>
+
+    <p>
+        Main Telegram:
+        <a href="https://t.me/iptvlinksm3u8"
+           target="_blank" rel="noopener">
+            Join Telegram
+        </a>
+    </p>
+
+    <p>© 2026 IND.bot. All Rights Reserved.</p>
+
+</footer>
+
+<script>
+
+const PLAYLIST_URL =
+"https://raw.githubusercontent.com/Mrbotrx/BD-OTT-PLAYLIST/main/india/India_vip.m3u";
+
+let allChannels = [];
+let selectedCategory = "all";
+
+const grid = document.getElementById("channelGrid");
+const search = document.getElementById("search");
+const categorySelect = document.getElementById("categorySelect");
+
+
+// Parse M3U attributes safely
+function getAttribute(line, attribute) {
+
+    const regex = new RegExp(
+        attribute + '="([^"]*)"',
+        "i"
+    );
+
+    const match = line.match(regex);
+
+    return match ? match[1] : "";
+
+}
+
+
+// LOAD PLAYLIST
+
+async function loadPlaylist() {
+
+    grid.innerHTML =
+    '<div class="loader">Loading channel directory...</div>';
+
+    try {
+
+        const response = await fetch(
+            PLAYLIST_URL + "?t=" + Date.now()
+        );
+
+        if (!response.ok) {
+            throw new Error("Playlist unavailable");
+        }
+
+        const text = await response.text();
+
+        parsePlaylist(text);
+
+    } catch(error) {
+
+        grid.innerHTML =
+        '<div class="error">Unable to load playlist. Please refresh the page.</div>';
+
+        console.error(error);
+
+    }
+
+}
+
+
+// PARSE M3U
+
+function parsePlaylist(data) {
+
+    const lines = data.split(/\r?\n/);
+
+    allChannels = [];
+
+    let current = null;
+
+    for (const line of lines) {
+
+        const value = line.trim();
+
+        if (value.startsWith("#EXTINF:")) {
+
+            const comma = value.lastIndexOf(",");
+
+            const name = comma >= 0
+                ? value.substring(comma + 1).trim()
+                : "";
+
+            const group =
+                getAttribute(value, "group-title") || "Uncategorized";
+
+            const logo =
+                getAttribute(value, "tvg-logo");
+
+            current = {
+                name: name,
+                category: group,
+                logo: logo
+            };
+
+        }
+
+        else if (
+            current &&
+            value &&
+            !value.startsWith("#")
+        ) {
+
+            // Never save or display streaming URLs.
+            // Ignore promotional playlist entries.
+
+            if (
+                current.name &&
+                current.name.toLowerCase() !== "iptv links"
+            ) {
+
+                allChannels.push({
+                    name: current.name,
+                    category: current.category,
+                    logo: current.logo
+                });
+
+            }
+
+            current = null;
+
+        }
+
+    }
+
+    // Remove duplicate channel entries
+
+    const unique = new Map();
+
+    allChannels.forEach(channel => {
+
+        const key =
+            channel.name.toLowerCase() +
+            "|" +
+            channel.category.toLowerCase();
+
+        if (!unique.has(key)) {
+            unique.set(key, channel);
+        }
+
+    });
+
+    allChannels = [...unique.values()];
+
+    updateCategories();
+
+    renderChannels();
+
+}
+
+
+// CATEGORY SYSTEM
+
+function updateCategories() {
+
+    const cats = [
+        ...new Set(allChannels.map(c => c.category))
+    ].sort();
+
+    document.getElementById("categories").textContent =
+        cats.length;
+
+    categorySelect.innerHTML =
+        '<option value="all">All Categories</option>';
+
+    document.getElementById("categoryButtons").innerHTML = "";
+
+    const allButton = document.createElement("button");
+
+    allButton.className = "cat-btn active";
+    allButton.textContent = "All";
+
+    allButton.onclick = () => selectCategory("all");
+
+    document.getElementById("categoryButtons")
+        .appendChild(allButton);
+
+    cats.forEach(cat => {
+
+        const option = document.createElement("option");
+
+        option.value = cat;
+        option.textContent = cat;
+
+        categorySelect.appendChild(option);
+
+        const button = document.createElement("button");
+
+        button.className = "cat-btn";
+        button.textContent = cat;
+
+        button.onclick = () => selectCategory(cat);
+
+        document.getElementById("categoryButtons")
+            .appendChild(button);
+
+    });
+
+}
+
+
+// SELECT CATEGORY
+
+function selectCategory(category) {
+
+    selectedCategory = category;
+
+    categorySelect.value = category;
+
+    document.querySelectorAll(".cat-btn").forEach(btn => {
+
+        btn.classList.toggle(
+            "active",
+            btn.textContent.toLowerCase() === category.toLowerCase()
+            || (category === "all" && btn.textContent === "All")
+        );
+
+    });
+
+    renderChannels();
+
+}
+
+
+// RENDER CHANNELS
+
+function renderChannels() {
+
+    const keyword = search.value.toLowerCase();
+
+    const filtered = allChannels.filter(channel => {
+
+        const matchesName =
+            channel.name.toLowerCase().includes(keyword);
+
+        const matchesCategory =
+            selectedCategory === "all" ||
+            channel.category === selectedCategory;
+
+        return matchesName && matchesCategory;
+
+    });
+
+    document.getElementById("total").textContent =
+        allChannels.length;
+
+    document.getElementById("visible").textContent =
+        filtered.length;
+
+    grid.innerHTML = "";
+
+    if (filtered.length === 0) {
+
+        grid.innerHTML =
+        '<div class="loader">No channels found.</div>';
+
+        return;
+
+    }
+
+    filtered.forEach(channel => {
+
+        const card = document.createElement("div");
+
+        card.className = "channel";
+
+        const img = document.createElement("img");
+
+        img.alt = channel.name;
+
+        img.loading = "lazy";
+
+        img.referrerPolicy = "no-referrer";
+
+        img.src = channel.logo || "";
+
+        img.onerror = function() {
+            this.src =
+            "https://placehold.co/100x80/18243a/ffffff?text=TV";
+        };
+
+        const title = document.createElement("h3");
+
+        title.textContent = channel.name;
+
+        const badge = document.createElement("small");
+
+        badge.textContent = channel.category;
+
+        card.appendChild(img);
+        card.appendChild(title);
+        card.appendChild(badge);
+
+        grid.appendChild(card);
+
+    });
+
+}
+
+
+// SEARCH
+
+search.addEventListener("input", renderChannels);
+
+
+// CATEGORY DROPDOWN
+
+categorySelect.addEventListener("change", function() {
+
+    selectCategory(this.value);
+
+});
+
+
+// INITIAL LOAD
+
+loadPlaylist();
+
+
+// AUTO REFRESH EVERY 5 MINUTES
+
+setInterval(loadPlaylist, 5 * 60 * 1000);
+
+</script>
+
+</body>
+</html>
